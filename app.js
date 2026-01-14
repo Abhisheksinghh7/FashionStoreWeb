@@ -109,6 +109,11 @@ function validateCheckoutAndRedirect() {
   const transactionId = "TXN" + Date.now();
   const totalAmount = cart.reduce((s, i) => s + i.price * i.qty, 0);
 
+  localStorage.setItem("checkoutCart", JSON.stringify(cart));
+  localStorage.setItem("checkoutTransactionId", transactionId);
+  localStorage.setItem("checkoutPaymentMethod", payment.value);
+
+  /* ❌ OLD getProductListItems - COMMENTED (using new XDM version instead)
   function getProductListItems() {
     return cart.map(i => ({
       SKU: String(i.id),
@@ -117,6 +122,7 @@ function validateCheckoutAndRedirect() {
       quantity: i.qty
     }));
   }
+  */
 
   window.adobeDataLayer = window.adobeDataLayer || [];
   window.adobeDataLayer.push({
@@ -127,15 +133,17 @@ function validateCheckoutAndRedirect() {
           orderID: transactionId,
           priceTotal: totalAmount
         },
-        productListItems: getProductListItems()
+        // ✅ Using comprehensive productListItems directly from cart
+        productListItems: cart.map(i => ({
+          SKU: String(i.id),
+          name: i.name,
+          priceTotal: i.price * i.qty,
+          quantity: i.qty
+        }))
       }
     },
     timestamp: new Date().toISOString()
   });
-
-  localStorage.setItem("checkoutCart", JSON.stringify(cart));
-  localStorage.setItem("checkoutTransactionId", transactionId);
-  localStorage.setItem("checkoutPaymentMethod", payment.value);
 
   location.href = "payment-gateway.html";
 }

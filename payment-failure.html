@@ -14,8 +14,8 @@
     const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
     const orderId = localStorage.getItem("checkoutTransactionId");
 
-    /* ✅ EXISTING XDM PAGE LOAD (UNCHANGED) */
-    adobeDataLayer.push({
+    /* ✅ PAGE LOAD - Web Details Only */
+    window.adobeDataLayer.push({
       event: "pageLoad",
       xdm: {
         web: {
@@ -34,28 +34,29 @@
       timestamp: new Date().toISOString()
     });
 
-    // ✅ PAYMENT FAILURE ITEMS - Load items to data layer
+    // ✅ PAYMENT FAILURE VIEW EVENT - Comprehensive productListItems + orderID
     if (cart.length > 0) {
-      const productListItems = cart.map((item, index) => ({
-        SKU: item.sku || "SKU-" + Math.floor(Math.random() * 10000),
-        _id: "prod_" + Date.now() + "_" + index,
-        currencyCode: item.currency || "INR",
-        discountAmount: Math.floor(Math.random() * 50),
-        name: item.name || "Sample Product",
-        priceTotal: (item.price || 100) * (item.quantity || item.qty || 1),
-        product: item.product || "Default Product",
-        productAddMethod: item.addMethod || "payment-failed",
-        productImageUrl: item.imageUrl || item.img || "",
-        quantity: item.quantity || item.qty || 1,
-        refundAmount: 0,
-        unitOfMeasureCode: "EA"
-      }));
-      
-      adobeDataLayer.push({
-        event: "pageLoad",
+      window.adobeDataLayer.push({
+        event: "paymentFailureView",
         xdm: {
           commerce: {
-            productListItems: productListItems
+            order: {
+              orderID: orderId
+            },
+            productListItems: cart.map((item, index) => ({
+              SKU: item.sku || "SKU-" + Math.floor(Math.random() * 10000),
+              _id: "prod_" + Date.now() + "_" + index,
+              currencyCode: item.currency || "INR",
+              discountAmount: Math.floor(Math.random() * 50),
+              name: item.name || "Sample Product",
+              priceTotal: (item.price || 100) * (item.quantity || item.qty || 1),
+              product: item.product || "Default Product",
+              productAddMethod: item.addMethod || "payment-failed",
+              productImageUrl: item.imageUrl || item.img || "",
+              quantity: item.quantity || item.qty || 1,
+              refundAmount: 0,
+              unitOfMeasureCode: "EA"
+            }))
           }
         },
         timestamp: new Date().toISOString()
@@ -124,31 +125,6 @@
 
   document.getElementById("grandTotal").textContent =
     "Total Amount: ₹" + total;
-
-  /* ================================
-     ✅ PAYMENT FAILED – XDM EVENT
-     ================================ */
-  function getProductListItems() {
-    return cart.map(p => ({
-      SKU: String(p.id),
-      name: p.name,
-      priceTotal: p.price * p.qty,
-      quantity: p.qty
-    }));
-  }
-
-  window.adobeDataLayer.push({
-    event: "paymentFailed",
-    xdm: {
-      commerce: {
-        order: {
-          orderID: orderId
-        },
-        productListItems: getProductListItems()
-      }
-    },
-    timestamp: new Date().toISOString()
-  });
 
   function goHome() {
     localStorage.removeItem("checkoutCart");

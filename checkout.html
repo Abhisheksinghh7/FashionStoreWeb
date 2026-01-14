@@ -24,7 +24,7 @@
     */
   </script>
 
-  <!-- ✅ XDM PAGE LOAD -->
+  <!-- ✅ XDM PAGE LOAD (Web Details Only) -->
   <script>
     window.adobeDataLayer.push({
       event: "pageLoad",
@@ -42,30 +42,28 @@
       timestamp: new Date().toISOString()
     });
 
-    // ✅ CHECKOUT ITEMS - Load checkout items to data layer
+    // ✅ CHECKOUT VIEW EVENT - Push once on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', function() {
       const cart = JSON.parse(localStorage.getItem("cart")) || [];
       if (cart.length > 0) {
-        const productListItems = cart.map((item, index) => ({
-          SKU: item.sku || "SKU-" + Math.floor(Math.random() * 10000),
-          _id: "prod_" + Date.now() + "_" + index,
-          currencyCode: item.currency || "INR",
-          discountAmount: Math.floor(Math.random() * 50),
-          name: item.name || "Sample Product",
-          priceTotal: (item.price || 100) * (item.quantity || item.qty || 1),
-          product: item.product || "Default Product",
-          productAddMethod: item.addMethod || "checkout",
-          productImageUrl: item.imageUrl || item.img || "",
-          quantity: item.quantity || item.qty || 1,
-          refundAmount: 0,
-          unitOfMeasureCode: "EA"
-        }));
-        
         window.adobeDataLayer.push({
-          event: "pageLoad",
+          event: "checkoutView",
           xdm: {
             commerce: {
-              productListItems: productListItems
+              productListItems: cart.map((item, index) => ({
+                SKU: item.sku || "SKU-" + Math.floor(Math.random() * 10000),
+                _id: "prod_" + Date.now() + "_" + index,
+                currencyCode: item.currency || "INR",
+                discountAmount: Math.floor(Math.random() * 50),
+                name: item.name || "Sample Product",
+                priceTotal: (item.price || 100) * (item.quantity || item.qty || 1),
+                product: item.product || "Default Product",
+                productAddMethod: item.addMethod || "checkout",
+                productImageUrl: item.imageUrl || item.img || "",
+                quantity: item.quantity || item.qty || 1,
+                refundAmount: 0,
+                unitOfMeasureCode: "EA"
+              }))
             }
           },
           timestamp: new Date().toISOString()
@@ -165,31 +163,11 @@
 <script src="adl-auto-track.js"></script>
 
 <script>
-  const cart = getCart();
+    const cart = getCart();
 
-  document.getElementById("checkoutTotal").textContent =
-    "Total Amount: ₹" + cart.reduce((s, i) => s + i.price * i.qty, 0);
-
-  /* =====================================
-     ✅ BEGIN CHECKOUT – XDM EVENT
-     ===================================== */
-  if (cart.length > 0) {
-    window.adobeDataLayer.push({
-      event: "beginCheckout",
-      xdm: {
-        commerce: {
-          productListItems: cart.map(p => ({
-            SKU: String(p.id),
-            name: p.name,
-            priceTotal: p.price * p.qty,
-            quantity: p.qty
-          }))
-        }
-      },
-      timestamp: new Date().toISOString()
-    });
-  }
-</script>
+    document.getElementById("checkoutTotal").textContent =
+      "Total Amount: ₹" + cart.reduce((s, i) => s + i.price * i.qty, 0);
+  </script>
 
 </body>
 </html>

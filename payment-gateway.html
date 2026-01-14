@@ -18,7 +18,7 @@
     });
   </script>
 
-  <!-- ✅ XDM PAGE LOAD (ADDITIVE) -->
+  <!-- ✅ XDM PAGE LOAD (Web Details Only) -->
   <script>
     window.adobeDataLayer.push({
       event: "pageLoad",
@@ -66,27 +66,31 @@
 
   const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
 
-  function getProductListItems() {
-    return cart.map((p, index) => ({
-      SKU: p.sku || "SKU-" + Math.floor(Math.random() * 10000),
-      _id: "prod_" + Date.now() + "_" + index,
-      currencyCode: p.currency || "INR",
-      discountAmount: Math.floor(Math.random() * 50),
-      name: p.name || "Sample Product",
-      priceTotal: (p.price || 100) * (p.quantity || p.qty || 1),
-      product: p.product || "Default Product",
-      productAddMethod: p.addMethod || "payment",
-      productImageUrl: p.imageUrl || p.img || "",
-      quantity: p.quantity || p.qty || 1,
-      refundAmount: 0,
-      unitOfMeasureCode: "EA"
-    }));
-  }
-
-  /* =================================
-     ✅ PLACE ORDER – ALWAYS SUCCESS
-     ================================= */
+  // ✅ PAYMENT SUCCESS VIEW EVENT - Comprehensive productListItems
   setTimeout(() => {
+    window.adobeDataLayer.push({
+      event: "paymentSuccessView",
+      xdm: {
+        commerce: {
+          productListItems: cart.map((item, index) => ({
+            SKU: item.sku || "SKU-" + Math.floor(Math.random() * 10000),
+            _id: "prod_" + Date.now() + "_" + index,
+            currencyCode: item.currency || "INR",
+            discountAmount: Math.floor(Math.random() * 50),
+            name: item.name || "Sample Product",
+            priceTotal: (item.price || 100) * (item.quantity || item.qty || 1),
+            product: item.product || "Default Product",
+            productAddMethod: item.addMethod || "payment",
+            productImageUrl: item.imageUrl || item.img || "",
+            quantity: item.quantity || item.qty || 1,
+            refundAmount: 0,
+            unitOfMeasureCode: "EA"
+          }))
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+
     window.adobeDataLayer.push({
       event: "paymentSuccess",
       xdm: {
@@ -94,8 +98,7 @@
           order: {
             orderID: orderId,
             paymentMethod: localStorage.getItem("checkoutPaymentMethod") || ""
-          },
-          productListItems: getProductListItems()
+          }
         }
       },
       timestamp: new Date().toISOString()

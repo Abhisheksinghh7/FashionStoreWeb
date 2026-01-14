@@ -24,7 +24,7 @@
     */
   </script>
 
-  <!-- ✅ XDM PAGE LOAD -->
+  <!-- ✅ XDM PAGE LOAD (Web Details Only) -->
   <script>
     window.adobeDataLayer.push({
       event: "pageLoad",
@@ -42,7 +42,7 @@
       timestamp: new Date().toISOString()
     });
 
-    // ✅ PRODUCT DETAIL - Load product to data layer
+    // ✅ PRODUCT VIEW EVENT - Comprehensive productListItems
     document.addEventListener('DOMContentLoaded', function() {
       const id = new URLSearchParams(location.search).get("id");
       const products = {
@@ -58,7 +58,7 @@
       const item = products[id];
       if (item) {
         window.adobeDataLayer.push({
-          event: "pageLoad",
+          event: "prodView",
           xdm: {
             commerce: {
               productListItems: [{

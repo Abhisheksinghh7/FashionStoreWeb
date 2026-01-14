@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Processing</title>
+
+  <script>
+    window.adobeDataLayer = window.adobeDataLayer || [];
+    const orderId = localStorage.getItem("checkoutTransactionId");
+
+    /* ❌ LEGACY PAGE LOAD (DO NOT DELETE) */
+    adobeDataLayer.push({
+      event: "pageLoad",
+      page: { pageName: "Payment Gateway", pageType: "payment" },
+      transaction: { orderId },
+      timestamp: new Date().toISOString()
+    });
+  </script>
+
+  <!-- ✅ XDM PAGE LOAD (ADDITIVE) -->
+  <script>
+    window.adobeDataLayer.push({
+      event: "pageLoad",
+      xdm: {
+        web: {
+          webPageDetails: {
+            pageName: "Payment Gateway",
+            pageType: "payment",
+            pageUrl: location.href,
+            pageUrlWithoutQSP: location.origin + location.pathname,
+            referrer: document.referrer || ""
+          }
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+  </script>
+
+  <!-- Adobe Launch -->
+  <script
+    src="https://assets.adobedtm.com/21b53c73144b/55564aea9b41/launch-64dcc44ec863-development.min.js"
+    async></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  <h2>Processing Payment</h2>
+</header>
+
+<div class="container" style="text-align:center">
+  <h3>Order ID: <strong id="orderId"></strong></h3>
+  <div class="loader"></div>
+  <p>Please wait while payment is processed...</p>
+</div>
+
+<script src="adl-utils.js"></script>
+<script src="adl-events.js"></script>
+<script src="adl-auto-track.js"></script>
+
+<script>
+  document.getElementById("orderId").textContent = orderId;
+
+  const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
+
+  function getProductListItems() {
+    return cart.map(p => ({
+      SKU: String(p.id),
+      name: p.name,
+      priceTotal: p.price * p.qty,
+      quantity: p.qty
+    }));
+  }
+
+  /* =================================
+     ✅ PLACE ORDER – ALWAYS SUCCESS
+     ================================= */
+  setTimeout(() => {
+    window.adobeDataLayer.push({
+      event: "paymentSuccess",
+      xdm: {
+        commerce: {
+          order: {
+            orderID: orderId,
+            paymentMethod: localStorage.getItem("checkoutPaymentMethod") || ""
+          },
+          productListItems: getProductListItems()
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+
+    location.href = "thankyou.html";
+  }, 3000);
+</script>
+
+</body>
+</html>

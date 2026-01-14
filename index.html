@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Fashion Store</title>
+
+  <script>
+    window.adobeDataLayer = window.adobeDataLayer || [];
+
+    /*
+    // ❌ LEGACY PAGE LOAD (COMMENTED — DO NOT DELETE)
+    adobeDataLayer.push({
+      event: "pageLoad",
+      page: {
+        pageName: "Home",
+        pageType: "homepage",
+        pageUrl: location.href,
+        pageUrlWithoutQSP: location.origin + location.pathname,
+        referrer: document.referrer || ""
+      },
+      timestamp: new Date().toISOString()
+    });
+    */
+  </script>
+
+  <!-- ✅ XDM PAGE LOAD (ACTIVE) -->
+  <script>
+    window.adobeDataLayer.push({
+      event: "pageLoad",
+      xdm: {
+        web: {
+          webPageDetails: {
+            pageName: "Home",
+            pageType: "homepage",
+            pageUrl: location.href,
+            pageUrlWithoutQSP: location.origin + location.pathname,
+            referrer: document.referrer || ""
+          }
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+  </script>
+
+  <script
+    src="https://assets.adobedtm.com/21b53c73144b/55564aea9b41/launch-64dcc44ec863-development.min.js"
+    async></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <header>
+    <h2>FashionStore</h2>
+    <nav>
+      <a href="index.html" data-track-link="Home" data-link-type="nav">Home</a>
+      <a href="products.html" data-track-link="Products" data-link-type="nav">Products</a>
+      <a href="cart.html" data-track-link="Cart" data-link-type="nav">Cart</a>
+    </nav>
+    <div class="mini-cart" onclick="goToCart()">🛒 <span id="miniCartCount">0</span></div>
+  </header>
+
+  <section class="hero">
+    <h1>Welcome to Fashion Store</h1>
+    <p>Shop the latest trends</p>
+    <a href="products.html" data-track-link="Shop Now" data-link-type="cta">
+      <button>Shop Now</button>
+    </a>
+  </section>
+
+  <footer>© Made by Abhishek Singh</footer>
+
+  <script src="app.js"></script>
+  <script src="adl-utils.js"></script>
+  <script src="adl-events.js"></script>
+  <script src="adl-auto-track.js"></script>
+
+</body>
+</html>

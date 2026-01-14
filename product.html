@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Product</title>
+
+  <script>
+    window.adobeDataLayer = window.adobeDataLayer || [];
+
+    /*
+    // ❌ LEGACY PAGE LOAD (COMMENTED — DO NOT DELETE)
+    adobeDataLayer.push({
+      event: "pageLoad",
+      page: {
+        pageName: "Product Detail",
+        pageType: "pdp",
+        pageUrl: location.href,
+        pageUrlWithoutQSP: location.origin + location.pathname,
+        referrer: document.referrer || ""
+      },
+      timestamp: new Date().toISOString()
+    });
+    */
+  </script>
+
+  <!-- ✅ XDM PAGE LOAD -->
+  <script>
+    window.adobeDataLayer.push({
+      event: "pageLoad",
+      xdm: {
+        web: {
+          webPageDetails: {
+            pageName: "Product Detail",
+            pageType: "pdp",
+            pageUrl: location.href,
+            pageUrlWithoutQSP: location.origin + location.pathname,
+            referrer: document.referrer || ""
+          }
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+  </script>
+
+  <!-- Adobe Launch -->
+  <script src="https://assets.adobedtm.com/21b53c73144b/55564aea9b41/launch-64dcc44ec863-development.min.js" async></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  <h2>FashionStore</h2>
+  <nav>
+    <a href="index.html" data-track-link="Home" data-link-type="nav">Home</a>
+    <a href="products.html" data-track-link="Products" data-link-type="nav">Products</a>
+    <a href="cart.html" data-track-link="Cart" data-link-type="nav">Cart</a>
+  </nav>
+  <div class="mini-cart" onclick="goToCart()">🛒 <span id="miniCartCount">0</span></div>
+</header>
+
+<div class="container" id="productDetail"></div>
+
+<footer>© Made by Abhishek Singh</footer>
+
+<script src="app.js"></script>
+<script src="adl-utils.js"></script>
+<script src="adl-events.js"></script>
+<script src="adl-auto-track.js"></script>
+
+<script>
+  const products = {
+    1: { id: 1, name: "T-Shirt", price: 799, discount: 10, coupon: "TSHIRT10", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800", color: "Red" },
+    2: { id: 2, name: "Jeans", price: 1999, discount: 5, coupon: "JEANS5", img: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", color: "Blue" },
+    3: { id: 3, name: "Jacket", price: 3499, discount: 15, coupon: "JACKET15", img: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", color: "Black" },
+    4: { id: 4, name: "Shoes", price: 2499, discount: 20, coupon: "SHOES20", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800", color: "White" },
+    5: { id: 5, name: "Shirt", price: 1499, discount: 0, coupon: "", img: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=800", color: "Grey" },
+    6: { id: 6, name: "Camera", price: 45999, discount: 5, coupon: "CAMERA5", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=800", color: "Black" },
+    7: { id: 7, name: "Headphone", price: 2999, discount: 10, coupon: "HEAD10", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800", color: "Blue" },
+    8: { id: 8, name: "Smartwatch", price: 9999, discount: 0, coupon: "", img: "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=800", color: "Black" }
+  };
+
+  const id = new URLSearchParams(location.search).get("id");
+  const p = products[id];
+  const c = document.getElementById("productDetail");
+
+  if (p) {
+    c.innerHTML = `
+      <img src="${p.img}" width="320">
+      <h2>${p.name}</h2>
+      <p>
+        Price: ₹${p.price}
+        ${p.discount ? `<span style="color:red"> (${p.discount}% OFF)</span>` : ""}
+      </p>
+      <p>Color: ${p.color}</p>
+      ${p.coupon ? `<p>Coupon: ${p.coupon}</p>` : ""}
+      <button data-track-link="Add to Cart" data-link-type="cta"
+        onclick='addToCart(${JSON.stringify(p)})'>Add to Cart</button>
+    `;
+  } else {
+    c.innerHTML = "<p>Product not found</p>";
+  }
+
+  updateMiniCart();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout</title>
+
+  <script>
+    window.adobeDataLayer = window.adobeDataLayer || [];
+
+    /*
+    // ❌ LEGACY PAGE LOAD (COMMENTED — DO NOT DELETE)
+    adobeDataLayer.push({
+      event: "pageLoad",
+      page: {
+        pageName: "Checkout",
+        pageType: "checkout",
+        pageUrl: location.href,
+        pageUrlWithoutQSP: location.origin + location.pathname,
+        referrer: document.referrer || ""
+      },
+      timestamp: new Date().toISOString()
+    });
+    */
+  </script>
+
+  <!-- ✅ XDM PAGE LOAD -->
+  <script>
+    window.adobeDataLayer.push({
+      event: "pageLoad",
+      xdm: {
+        web: {
+          webPageDetails: {
+            pageName: "Checkout",
+            pageType: "checkout",
+            pageUrl: location.href,
+            pageUrlWithoutQSP: location.origin + location.pathname,
+            referrer: document.referrer || ""
+          }
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+  </script>
+
+  <!-- Adobe Launch -->
+  <script
+    src="https://assets.adobedtm.com/21b53c73144b/55564aea9b41/launch-64dcc44ec863-development.min.js"
+    async></script>
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .payment-methods {
+      display: flex;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .payment-card {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      cursor: pointer;
+      background: #fff;
+    }
+
+    .payment-card img {
+      width: 45px;
+    }
+
+    .payment-card input[type="radio"] {
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h2>Checkout</h2>
+  <div class="mini-cart" onclick="goToCart()">🛒 <span id="miniCartCount">0</span></div>
+</header>
+
+<div class="container">
+  <h3 id="checkoutTotal"></h3>
+
+  <div class="customer-info">
+    <input type="text" id="custName" placeholder="Full Name">
+    <input type="text" id="custPhone" placeholder="Mobile Number">
+    <input type="email" id="custEmail" placeholder="Email Address">
+  </div>
+
+  <div class="payment-methods">
+    <label class="payment-card">
+      <input type="radio" name="payment" value="PhonePe">
+      <img src="PhonePeSVG.wine.svg">
+    </label>
+
+    <label class="payment-card">
+      <input type="radio" name="payment" value="GPay">
+      <img src="GooglepaySVG.wine.svg">
+    </label>
+
+    <label class="payment-card">
+      <input type="radio" name="payment" value="Paytm">
+      <img src="PaytmSVG.wine.svg">
+    </label>
+  </div>
+
+  <div class="checkout-actions">
+    <button id="placeOrderBtn">Place Order</button>
+    <button type="button" id="cancelOrderBtn">Cancel Order</button>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h3 id="mTitle"></h3>
+      <p id="mText"></p>
+      <button id="okBtn">OK</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script src="cancel-order.js"></script>
+<script src="adl-utils.js"></script>
+<script src="adl-events.js"></script>
+<script src="adl-auto-track.js"></script>
+
+<script>
+  const cart = getCart();
+
+  document.getElementById("checkoutTotal").textContent =
+    "Total Amount: ₹" + cart.reduce((s, i) => s + i.price * i.qty, 0);
+
+  /* =====================================
+     ✅ BEGIN CHECKOUT – XDM EVENT
+     ===================================== */
+  if (cart.length > 0) {
+    window.adobeDataLayer.push({
+      event: "beginCheckout",
+      xdm: {
+        commerce: {
+          productListItems: cart.map(p => ({
+            SKU: String(p.id),
+            name: p.name,
+            priceTotal: p.price * p.qty,
+            quantity: p.qty
+          }))
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+  }
+</script>
+
+</body>
+</html>

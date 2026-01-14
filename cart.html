@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Cart</title>
+
+  <script>
+    window.adobeDataLayer = window.adobeDataLayer || [];
+
+    /*
+    // ❌ LEGACY PAGE LOAD (COMMENTED — DO NOT DELETE)
+    adobeDataLayer.push({
+      event: "pageLoad",
+      page: {
+        pageName: "Cart",
+        pageType: "cart",
+        pageUrl: location.href,
+        pageUrlWithoutQSP: location.origin + location.pathname,
+        referrer: document.referrer || ""
+      },
+      timestamp: new Date().toISOString()
+    });
+    */
+  </script>
+
+  <!-- ✅ XDM PAGE LOAD -->
+  <script>
+    window.adobeDataLayer.push({
+      event: "pageLoad",
+      xdm: {
+        web: {
+          webPageDetails: {
+            pageName: "Cart",
+            pageType: "cart",
+            pageUrl: location.href,
+            pageUrlWithoutQSP: location.origin + location.pathname,
+            referrer: document.referrer || ""
+          }
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+  </script>
+
+  <!-- Adobe Launch -->
+  <script src="https://assets.adobedtm.com/21b53c73144b/55564aea9b41/launch-64dcc44ec863-development.min.js"
+    async></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  <h2>FashionStore</h2>
+  <nav>
+    <a href="index.html" data-track-link="Home" data-link-type="nav">Home</a>
+    <a href="products.html" data-track-link="Shop" data-link-type="nav">Shop</a>
+  </nav>
+  <div class="mini-cart">🛒 <span id="miniCartCount">0</span></div>
+</header>
+
+<div class="container">
+  <h2>Your Cart</h2>
+  <div id="cartItems"></div>
+  <h3 id="cartTotal"></h3>
+  <button id="clearCartBtn">Clear Cart</button><br><br>
+  <a href="checkout.html" data-track-link="Checkout" data-link-type="cta">
+    <button>Checkout</button>
+  </a>
+</div>
+
+<footer>© Made by Abhishek Singh</footer>
+
+<script src="app.js"></script>
+<script src="adl-utils.js"></script>
+<script src="adl-events.js"></script>
+<script src="adl-auto-track.js"></script>
+
+<script>
+  let cart = getCart();
+  const items = document.getElementById("cartItems");
+  const totalEl = document.getElementById("cartTotal");
+
+  function renderCart() {
+    items.innerHTML = "";
+    let total = 0;
+
+    if (cart.length === 0) {
+      items.innerHTML = "<p>Cart is empty</p>";
+      totalEl.textContent = "";
+      updateMiniCart();
+      return;
+    }
+
+    cart.forEach(i => {
+      const t = i.price * i.qty;
+      total += t;
+      items.innerHTML += `
+        <div class="cart-item">
+          <img src="${i.img}">
+          <strong>${i.name}</strong>
+          ₹${i.price}
+          <p>Color: ${i.color || ''}</p>
+          <p>Coupon: ${i.coupon || ''}</p>
+          <button onclick="qty(${i.id},-1)">-</button>
+          ${i.qty}
+          <button onclick="qty(${i.id},1)">+</button>
+        </div>
+      `;
+    });
+
+    totalEl.textContent = "Total: ₹" + total;
+    updateMiniCart();
+
+    /* ==============================
+       ✅ XDM PRODUCT LIST ITEMS
+       ============================== */
+    const productListItems = cart.map(p => ({
+      SKU: String(p.id),
+      name: p.name,
+      priceTotal: p.price * p.qty,
+      quantity: p.qty
+    }));
+
+    window.adobeDataLayer.push({
+      event: "cartView",
+      xdm: {
+        commerce: {
+          productListItems: productListItems
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  function qty(id, d) {
+    const i = cart.find(x => x.id === id);
+    i.qty = Math.max(1, i.qty + d);
+    saveCart(cart);
+    renderCart();
+  }
+
+  document.getElementById("clearCartBtn").onclick = () => {
+    cart = [];
+    saveCart(cart);
+    renderCart();
+  };
+
+  renderCart();
+</script>
+
+</body>
+</html>

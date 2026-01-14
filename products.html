@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Products</title>
+
+  <!-- Adobe Data Layer -->
+  <script>
+    window.adobeDataLayer = window.adobeDataLayer || [];
+  </script>
+
+  <!-- XDM Page Load -->
+  <script>
+    window.adobeDataLayer.push({
+      event: "pageLoad",
+      xdm: {
+        web: {
+          webPageDetails: {
+            pageName: "Products",
+            pageType: "product-listing",
+            pageUrl: location.href,
+            pageUrlWithoutQSP: location.origin + location.pathname,
+            referrer: document.referrer || ""
+          }
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+  </script>
+
+  <!-- Adobe Launch -->
+  <script src="https://assets.adobedtm.com/21b53c73144b/55564aea9b41/launch-64dcc44ec863-development.min.js" async></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  <h2>FashionStore</h2>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="cart.html">Cart</a>
+  </nav>
+  <div class="mini-cart" onclick="goToCart()">🛒 <span id="miniCartCount">0</span></div>
+</header>
+
+<!-- PRODUCT GRID -->
+<div class="container products" id="productList"></div>
+
+<footer>© Made by Abhishek Singh</footer>
+
+<script src="app.js"></script>
+
+<script>
+  const products = [
+    { id: 1, name: "T-Shirt", price: 799, discount: 10, coupon: "TSHIRT10", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800", color: "Red" },
+    { id: 2, name: "Jeans", price: 1999, discount: 5, coupon: "JEANS5", img: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", color: "Blue" },
+    { id: 3, name: "Jacket", price: 3499, discount: 15, coupon: "JACKET15", img: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", color: "Black" },
+    { id: 4, name: "Shoes", price: 2499, discount: 20, coupon: "SHOES20", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800", color: "White" },
+    { id: 5, name: "Shirt", price: 1499, discount: 0, coupon: "", img: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=800", color: "Grey" },
+    { id: 6, name: "Camera", price: 45999, discount: 5, coupon: "CAMERA5", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=800", color: "Black" },
+    { id: 7, name: "Headphone", price: 2999, discount: 10, coupon: "HEAD10", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800", color: "Blue" },
+    { id: 8, name: "Smartwatch", price: 9999, discount: 0, coupon: "", img: "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=800", color: "Black" }
+  ];
+
+  const container = document.getElementById("productList");
+
+  products.forEach(p => {
+    container.innerHTML += `
+      <div class="card">
+        <img src="${p.img}" alt="${p.name}">
+        <div class="info">
+          <h4>${p.name}</h4>
+          <p>
+            ₹${p.price}
+            ${p.discount ? `<span style="color:red"> (${p.discount}% OFF)</span>` : ""}
+          </p>
+          <p>Color: ${p.color}</p>
+          ${p.coupon ? `<p>Coupon: ${p.coupon}</p>` : ""}
+          <a href="product.html?id=${p.id}">
+            <button>View</button>
+          </a>
+        </div>
+      </div>
+    `;
+  });
+
+  updateMiniCart();
+</script>
+
+</body>
+</html>

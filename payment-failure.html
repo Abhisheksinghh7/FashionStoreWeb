@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Failed</title>
+
+  <!-- ACDL INIT -->
+  <script>
+    window.adobeDataLayer = window.adobeDataLayer || [];
+  </script>
+
+  <script>
+    const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
+    const orderId = localStorage.getItem("checkoutTransactionId");
+
+    /* ✅ EXISTING XDM PAGE LOAD (UNCHANGED) */
+    adobeDataLayer.push({
+      event: "pageLoad",
+      xdm: {
+        web: {
+          webPageDetails: {
+            pageName: "Payment Failed",
+            pageType: "payment-failed"
+          }
+        }
+      },
+      custData: {
+        platform: "desktop web",
+        loginStatus: "guest",
+        language: "en",
+        customerID: ""
+      },
+      timestamp: new Date().toISOString()
+    });
+  </script>
+
+  <!-- Adobe Launch -->
+  <script
+    src="https://assets.adobedtm.com/21b53c73144b/55564aea9b41/launch-64dcc44ec863-development.min.js"
+    async></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  <h2>Payment Failed</h2>
+</header>
+
+<div class="container thankyou-container">
+  <h2>❌ Order Cancelled</h2>
+  <p>Order ID: <strong id="orderId"></strong></p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>ID</th>
+        <th>Qty</th>
+        <th>Amount</th>
+        <th>Color</th>
+        <th>Coupon</th>
+      </tr>
+    </thead>
+    <tbody id="orderRows"></tbody>
+  </table>
+
+  <h3 id="grandTotal"></h3>
+
+  <button onclick="goHome()">Home</button>
+</div>
+
+<script>
+  document.getElementById("orderId").textContent = orderId || "N/A";
+
+  let total = 0;
+  const rows = document.getElementById("orderRows");
+
+  cart.forEach(p => {
+    const amt = p.price * p.qty;
+    total += amt;
+
+    rows.innerHTML += `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.id}</td>
+        <td>${p.qty}</td>
+        <td>₹${amt}</td>
+        <td>${p.color || ''}</td>
+        <td>${p.coupon || ''}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("grandTotal").textContent =
+    "Total Amount: ₹" + total;
+
+  /* ================================
+     ✅ PAYMENT FAILED – XDM EVENT
+     ================================ */
+  function getProductListItems() {
+    return cart.map(p => ({
+      SKU: String(p.id),
+      name: p.name,
+      priceTotal: p.price * p.qty,
+      quantity: p.qty
+    }));
+  }
+
+  window.adobeDataLayer.push({
+    event: "paymentFailed",
+    xdm: {
+      commerce: {
+        order: {
+          orderID: orderId
+        },
+        productListItems: getProductListItems()
+      }
+    },
+    timestamp: new Date().toISOString()
+  });
+
+  function goHome() {
+    localStorage.removeItem("checkoutCart");
+    localStorage.removeItem("checkoutTransactionId");
+    localStorage.removeItem("checkoutFailureReason");
+    location.href = "index.html";
+  }
+</script>
+
+</body>
+</html>

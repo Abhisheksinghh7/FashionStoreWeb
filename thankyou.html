@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Thank You</title>
+
+  <script>
+    window.adobeDataLayer = window.adobeDataLayer || [];
+
+    /*
+    // ❌ LEGACY PAGE LOAD (COMMENTED — DO NOT DELETE)
+    adobeDataLayer.push({
+      event: "pageLoad",
+      page: {
+        pageName: "Thank You",
+        pageType: "order-confirmation",
+        pageUrl: location.href,
+        pageUrlWithoutQSP: location.origin + location.pathname,
+        referrer: document.referrer || ""
+      },
+      timestamp: new Date().toISOString()
+    });
+    */
+  </script>
+
+  <!-- ✅ XDM PAGE LOAD (ACTIVE) -->
+  <script>
+    window.adobeDataLayer.push({
+      event: "pageLoad",
+      xdm: {
+        web: {
+          webPageDetails: {
+            pageName: "Thank You",
+            pageType: "order-confirmation",
+            pageUrl: location.href,
+            pageUrlWithoutQSP: location.origin + location.pathname,
+            referrer: document.referrer || ""
+          }
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+  </script>
+
+  <script
+    src="https://assets.adobedtm.com/21b53c73144b/55564aea9b41/launch-64dcc44ec863-development.min.js"
+    async></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  <h2>Order Confirmed</h2>
+</header>
+
+<div class="container thankyou-container">
+  <h2>🎉 Thank You for Your Order</h2>
+
+  <table width="100%" border="1" cellspacing="0" cellpadding="8">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>ID</th>
+        <th>Qty</th>
+        <th>Amount</th>
+        <th>Color</th>
+        <th>Coupon</th>
+      </tr>
+    </thead>
+    <tbody id="orderRows"></tbody>
+  </table>
+
+  <h3 id="grandTotal"></h3>
+  <button onclick="finishOrder()">Go to Home</button>
+</div>
+
+<script src="app.js"></script>
+<script src="adl-utils.js"></script>
+<script src="adl-events.js"></script>
+<script src="adl-auto-track.js"></script>
+
+<script>
+  const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
+  const orderId = localStorage.getItem("checkoutTransactionId");
+  let total = 0;
+
+  cart.forEach(p => {
+    const amt = p.price * p.qty;
+    total += amt;
+
+    orderRows.innerHTML += `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.id}</td>
+        <td>${p.qty}</td>
+        <td>₹${amt}</td>
+        <td>${p.color || ''}</td>
+        <td>${p.coupon || ''}</td>
+      </tr>
+    `;
+  });
+
+  grandTotal.textContent = "Total Paid: ₹" + total;
+
+  /* =================================
+     ✅ ORDER SUCCESS – XDM EVENT
+     ================================= */
+  function getProductListItems() {
+    return cart.map(p => ({
+      SKU: String(p.id),
+      name: p.name,
+      priceTotal: p.price * p.qty,
+      quantity: p.qty
+    }));
+  }
+
+  window.adobeDataLayer.push({
+    event: "orderSuccess",
+    xdm: {
+      commerce: {
+        order: {
+          orderID: orderId,
+          priceTotal: total
+        },
+        productListItems: getProductListItems()
+      }
+    },
+    timestamp: new Date().toISOString()
+  });
+
+  function finishOrder() {
+    localStorage.clear();
+    location.href = "index.html";
+  }
+</script>
+
+</body>
+</html>

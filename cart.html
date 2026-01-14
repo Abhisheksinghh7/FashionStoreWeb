@@ -41,6 +41,37 @@
       },
       timestamp: new Date().toISOString()
     });
+
+    // ✅ CART ITEMS - Load cart items to data layer
+    document.addEventListener('DOMContentLoaded', function() {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      if (cart.length > 0) {
+        const productListItems = cart.map((item, index) => ({
+          SKU: item.sku || "SKU-" + Math.floor(Math.random() * 10000),
+          _id: "prod_" + Date.now() + "_" + index,
+          currencyCode: item.currency || "INR",
+          discountAmount: Math.floor(Math.random() * 50),
+          name: item.name || "Sample Product",
+          priceTotal: (item.price || 100) * (item.quantity || item.qty || 1),
+          product: item.product || "Default Product",
+          productAddMethod: item.addMethod || "cart",
+          productImageUrl: item.imageUrl || item.img || "",
+          quantity: item.quantity || item.qty || 1,
+          refundAmount: 0,
+          unitOfMeasureCode: "EA"
+        }));
+        
+        window.adobeDataLayer.push({
+          event: "pageLoad",
+          xdm: {
+            commerce: {
+              productListItems: productListItems
+            }
+          },
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
   </script>
 
   <!-- Adobe Launch -->

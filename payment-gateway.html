@@ -67,11 +67,19 @@
   const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
 
   function getProductListItems() {
-    return cart.map(p => ({
-      SKU: String(p.id),
-      name: p.name,
-      priceTotal: p.price * p.qty,
-      quantity: p.qty
+    return cart.map((p, index) => ({
+      SKU: p.sku || "SKU-" + Math.floor(Math.random() * 10000),
+      _id: "prod_" + Date.now() + "_" + index,
+      currencyCode: p.currency || "INR",
+      discountAmount: Math.floor(Math.random() * 50),
+      name: p.name || "Sample Product",
+      priceTotal: (p.price || 100) * (p.quantity || p.qty || 1),
+      product: p.product || "Default Product",
+      productAddMethod: p.addMethod || "payment",
+      productImageUrl: p.imageUrl || p.img || "",
+      quantity: p.quantity || p.qty || 1,
+      refundAmount: 0,
+      unitOfMeasureCode: "EA"
     }));
   }
 

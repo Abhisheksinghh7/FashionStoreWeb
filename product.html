@@ -41,6 +41,46 @@
       },
       timestamp: new Date().toISOString()
     });
+
+    // ✅ PRODUCT DETAIL - Load product to data layer
+    document.addEventListener('DOMContentLoaded', function() {
+      const id = new URLSearchParams(location.search).get("id");
+      const products = {
+        1: { id: 1, name: "T-Shirt", price: 799, discount: 10, coupon: "TSHIRT10", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800", color: "Red", sku: "TSHIRT-001", currency: "INR", product: "T-Shirt", addMethod: "pdp", imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800", quantity: 1 },
+        2: { id: 2, name: "Jeans", price: 1999, discount: 5, coupon: "JEANS5", img: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", color: "Blue", sku: "JEANS-002", currency: "INR", product: "Jeans", addMethod: "pdp", imageUrl: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", quantity: 1 },
+        3: { id: 3, name: "Jacket", price: 3499, discount: 15, coupon: "JACKET15", img: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", color: "Black", sku: "JACKET-003", currency: "INR", product: "Jacket", addMethod: "pdp", imageUrl: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", quantity: 1 },
+        4: { id: 4, name: "Shoes", price: 2499, discount: 20, coupon: "SHOES20", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800", color: "White", sku: "SHOES-004", currency: "INR", product: "Shoes", addMethod: "pdp", imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800", quantity: 1 },
+        5: { id: 5, name: "Shirt", price: 1499, discount: 0, coupon: "", img: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=800", color: "Grey", sku: "SHIRT-005", currency: "INR", product: "Shirt", addMethod: "pdp", imageUrl: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=800", quantity: 1 },
+        6: { id: 6, name: "Camera", price: 45999, discount: 5, coupon: "CAMERA5", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=800", color: "Black", sku: "CAMERA-006", currency: "INR", product: "Camera", addMethod: "pdp", imageUrl: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=800", quantity: 1 },
+        7: { id: 7, name: "Headphone", price: 2999, discount: 10, coupon: "HEAD10", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800", color: "Blue", sku: "HEADPHONE-007", currency: "INR", product: "Headphone", addMethod: "pdp", imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800", quantity: 1 },
+        8: { id: 8, name: "Smartwatch", price: 9999, discount: 0, coupon: "", img: "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=800", color: "Black", sku: "SMARTWATCH-008", currency: "INR", product: "Smartwatch", addMethod: "pdp", imageUrl: "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=800", quantity: 1 }
+      };
+      const item = products[id];
+      if (item) {
+        window.adobeDataLayer.push({
+          event: "pageLoad",
+          xdm: {
+            commerce: {
+              productListItems: [{
+                SKU: item.sku || "SKU-" + Math.floor(Math.random() * 10000),
+                _id: "prod_" + Date.now() + "_0",
+                currencyCode: item.currency || "INR",
+                discountAmount: item.discount || 0,
+                name: item.name || "Sample Product",
+                priceTotal: item.price || 100,
+                product: item.product || "Default Product",
+                productAddMethod: item.addMethod || "unknown",
+                productImageUrl: item.imageUrl || "",
+                quantity: item.quantity || 1,
+                refundAmount: 0,
+                unitOfMeasureCode: "EA"
+              }]
+            }
+          },
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
   </script>
 
   <!-- Adobe Launch -->

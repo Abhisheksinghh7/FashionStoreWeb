@@ -7,79 +7,74 @@
 
   <script>
     window.adobeDataLayer = window.adobeDataLayer || [];
-
-    /*
-    // ❌ LEGACY PAGE LOAD (COMMENTED — DO NOT DELETE)
-    adobeDataLayer.push({
-      event: "pageLoad",
-      page: {
-        pageName: "Thank You",
-        pageType: "order-confirmation",
-        pageUrl: location.href,
-        pageUrlWithoutQSP: location.origin + location.pathname,
-        referrer: document.referrer || ""
-      },
-      timestamp: new Date().toISOString()
-    });
-    */
   </script>
 
-  <!-- ✅ XDM PAGE LOAD (Web Details Only) -->
+  <!-- ✅ XDM PAGE LOAD (Page-level only, NO product details) -->
   <script>
     window.adobeDataLayer.push({
-      event: "pageLoad",
-      xdm: {
+      event: "pageLoaded",
+      xdmPageLoad: {
+        custData: {
+          customerID: "",
+          lang: "english",
+          loginStatus: "guest",
+          platform: "desktop website"
+        },
         web: {
           webPageDetails: {
-            pageName: "Thank You",
-            pageType: "order-confirmation",
-            pageUrl: location.href,
-            pageUrlWithoutQSP: location.origin + location.pathname,
-            referrer: document.referrer || ""
+            brand: "Fashion Store",
+            channel: "web|confirmation",
+            pageName: "confirmation",
+            pageType: "confirmation",
+            pageUrl: window.location.href
           }
         }
-      },
-      timestamp: new Date().toISOString()
+      }
     });
 
-    // ✅ ORDER SUCCESS VIEW EVENT - Comprehensive productListItems + orderID + revenue
+    // ✅ PURCHASE EVENT (scPurchase) - Complete order details with all product/revenue info
     document.addEventListener('DOMContentLoaded', function() {
       const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
-      const orderId = localStorage.getItem("checkoutTransactionId");
-      let totalRevenue = 0;
+      const orderId = localStorage.getItem("checkoutTransactionId") || "ORD-" + Date.now();
       
-      // Calculate revenue
-      cart.forEach(item => {
-        totalRevenue += (item.price || 100) * (item.quantity || item.qty || 1);
-      });
-      
-      if (cart.length > 0) {
-        window.adobeDataLayer.push({
-          event: "orderSuccessView",
-          xdm: {
-            commerce: {
-              order: {
-                orderID: orderId,
-                priceTotal: totalRevenue
-              },
-              productListItems: cart.map((item, index) => ({
-                SKU: item.sku || "SKU-" + Math.floor(Math.random() * 10000),
-                _id: "prod_" + Date.now() + "_" + index,
-                currencyCode: item.currency || "INR",
-                discountAmount: Math.floor(Math.random() * 50),
-                name: item.name || "Sample Product",
-                priceTotal: (item.price || 100) * (item.quantity || item.qty || 1),
-                product: item.product || "Default Product",
-                productAddMethod: item.addMethod || "thankyou",
-                productImageUrl: item.imageUrl || item.img || "",
-                quantity: item.quantity || item.qty || 1,
-                refundAmount: 0,
-                unitOfMeasureCode: "EA"
-              }))
-            }
-          },
-          timestamp: new Date().toISOString()
+      if (cart.length > 0 && window.adl && window.adl.trackPurchase) {
+        let total = 0;
+        const products = cart.map(item => {
+          total += item.price * item.qty;
+          return {
+            sku: 'SKU-' + item.id,
+            productID: item.id,
+            productName: item.name,
+            brand: 'Fashion Store',
+            category: '',
+            price: item.price,
+            color: item.color || '',
+            size: '',
+            quantity: item.qty,
+            currencyCode: "INR"
+          };
         });
+        
+        const orderData = {
+          orderID: orderId,
+          totalQuantity: cart.reduce((sum, item) => sum + item.qty, 0),
+          subtotal: total,
+          shipping: 0,
+          tax: 0,
+          totalValue: total,
+          paymentMethod: 'credit_card',
+          customerEmail: '',
+          firstName: '',
+          lastName: '',
+          email: '',
+          address: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          products: products
+        };
+        
+        window.adl.trackPurchase(orderData);
       }
     });
   </script>

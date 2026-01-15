@@ -21,22 +21,41 @@ function addToCart(product) {
       img: product.img,
       qty: 1,
       color: product.color || '',
-      coupon: product.coupon || ''
+      coupon: product.coupon || '',
+      discount: product.discount || 0,
+      category: product.category || '',
+      sku: product.sku || 'SKU-' + product.id,
+      size: product.size || ''
     });
   }
 
   saveCart(cart);
 
   window.adobeDataLayer = window.adobeDataLayer || [];
+  const discountAmount = product.discount ? (product.price * product.discount / 100) : 0;
   window.adobeDataLayer.push({
     event: "addToCart",
     xdm: {
       commerce: {
         productListItems: [{
-          SKU: String(product.id),
-          name: product.name,
-          priceTotal: product.price,
-          quantity: 1
+          SKU: product.sku || 'SKU-' + product.id,
+          currencyCode: "INR",
+          discountAmount: discountAmount,
+          discountPercent: product.discount || 0,
+          name: product.name || '',
+          priceTotal: product.price || 0,
+          product: "Default Product",
+          productAddMethod: "cart",
+          productImageUrl: product.img || product.productImageUrl || '',
+          quantity: product.quantity || 1,
+          refundAmount: 0,
+          unitOfMeasureCode: "EA",
+          _id: product._id || 'prod_' + product.id,
+          color: product.color || '',
+          coupon: product.coupon || '',
+          category: product.category || '',
+          size: product.size || '',
+          brand: "Fashion Store"
         }]
       }
     },
@@ -133,13 +152,29 @@ function validateCheckoutAndRedirect() {
           orderID: transactionId,
           priceTotal: totalAmount
         },
-        // ✅ Using comprehensive productListItems directly from cart
-        productListItems: cart.map(i => ({
-          SKU: String(i.id),
-          name: i.name,
-          priceTotal: i.price * i.qty,
-          quantity: i.qty
-        }))
+        productListItems: cart.map(i => {
+          const discountAmount = i.discount ? (i.price * i.discount / 100) : 0;
+          return {
+            SKU: i.sku || 'SKU-' + i.id,
+            currencyCode: "INR",
+            discountAmount: discountAmount,
+            discountPercent: i.discount || 0,
+            name: i.name || '',
+            priceTotal: i.price * i.qty,
+            product: "Default Product",
+            productAddMethod: "cart",
+            productImageUrl: i.img || i.productImageUrl || '',
+            quantity: i.qty || 1,
+            refundAmount: 0,
+            unitOfMeasureCode: "EA",
+            _id: i._id || 'prod_' + i.id,
+            color: i.color || '',
+            coupon: i.coupon || '',
+            category: i.category || '',
+            size: i.size || '',
+            brand: "Fashion Store"
+          };
+        })
       }
     },
     timestamp: new Date().toISOString()

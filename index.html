@@ -7,39 +7,29 @@
 
   <script>
     window.adobeDataLayer = window.adobeDataLayer || [];
-
-    /*
-    // ❌ LEGACY PAGE LOAD (COMMENTED — DO NOT DELETE)
-    adobeDataLayer.push({
-      event: "pageLoad",
-      page: {
-        pageName: "Home",
-        pageType: "homepage",
-        pageUrl: location.href,
-        pageUrlWithoutQSP: location.origin + location.pathname,
-        referrer: document.referrer || ""
-      },
-      timestamp: new Date().toISOString()
-    });
-    */
   </script>
 
   <!-- ✅ XDM PAGE LOAD (ACTIVE) -->
   <script>
     window.adobeDataLayer.push({
-      event: "pageLoad",
-      xdm: {
+      event: "pageLoaded",
+      xdmPageLoad: {
+        custData: {
+          customerID: "",
+          lang: "english",
+          loginStatus: "guest",
+          platform: "desktop website"
+        },
         web: {
           webPageDetails: {
-            pageName: "Home",
-            pageType: "homepage",
-            pageUrl: location.href,
-            pageUrlWithoutQSP: location.origin + location.pathname,
-            referrer: document.referrer || ""
+            brand: "Fashion Store",
+            channel: "web|home",
+            pageName: "home",
+            pageType: "home",
+            pageUrl: window.location.href
           }
         }
-      },
-      timestamp: new Date().toISOString()
+      }
     });
   </script>
 

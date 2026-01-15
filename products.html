@@ -9,22 +9,27 @@
     window.adobeDataLayer = window.adobeDataLayer || [];
   </script>
 
-  <!-- XDM Page Load -->
+  <!-- ✅ XDM PAGE LOAD -->
   <script>
     window.adobeDataLayer.push({
-      event: "pageLoad",
-      xdm: {
+      event: "pageLoaded",
+      xdmPageLoad: {
+        custData: {
+          customerID: "",
+          lang: "english",
+          loginStatus: "guest",
+          platform: "desktop website"
+        },
         web: {
           webPageDetails: {
-            pageName: "Products",
-            pageType: "product-listing",
-            pageUrl: location.href,
-            pageUrlWithoutQSP: location.origin + location.pathname,
-            referrer: document.referrer || ""
+            brand: "Fashion Store",
+            channel: "web|category",
+            pageName: "plp",
+            pageType: "category",
+            pageUrl: window.location.href
           }
         }
-      },
-      timestamp: new Date().toISOString()
+      }
     });
   </script>
 

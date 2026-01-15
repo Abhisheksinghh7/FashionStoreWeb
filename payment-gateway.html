@@ -72,20 +72,36 @@
       event: "paymentSuccessView",
       xdm: {
         commerce: {
-          productListItems: cart.map((item, index) => ({
-            SKU: item.sku || "SKU-" + Math.floor(Math.random() * 10000),
-            _id: "prod_" + Date.now() + "_" + index,
-            currencyCode: item.currency || "INR",
-            discountAmount: Math.floor(Math.random() * 50),
-            name: item.name || "Sample Product",
-            priceTotal: (item.price || 100) * (item.quantity || item.qty || 1),
-            product: item.product || "Default Product",
-            productAddMethod: item.addMethod || "payment",
-            productImageUrl: item.imageUrl || item.img || "",
-            quantity: item.quantity || item.qty || 1,
-            refundAmount: 0,
-            unitOfMeasureCode: "EA"
-          }))
+          productListItems: cart.map((item, index) => {
+            const catalogProduct = window.adl?.productCatalog?.[item.id] || {};
+            const name = item.name || catalogProduct.name || '';
+            const img = item.img || catalogProduct.img || '';
+            const discount = item.discount !== undefined ? item.discount : (catalogProduct.discount || 0);
+            const coupon = item.coupon || catalogProduct.coupon || '';
+            const category = item.category || catalogProduct.category || '';
+            const color = item.color || catalogProduct.color || '';
+            const discountAmount = discount ? (item.price * discount / 100) : 0;
+            return {
+              SKU: item.sku || 'SKU-' + item.id,
+              currencyCode: "INR",
+              discountAmount: discountAmount,
+              discountPercent: discount,
+              name: name,
+              priceTotal: (item.price || 0) * (item.qty || 1),
+              product: "Default Product",
+              productAddMethod: "cart",
+              productImageUrl: img,
+              quantity: item.qty || 1,
+              refundAmount: 0,
+              unitOfMeasureCode: "EA",
+              _id: item._id || 'prod_' + item.id,
+              color: color,
+              coupon: coupon,
+              category: category,
+              size: item.size || '',
+              brand: "Fashion Store"
+            };
+          })
         }
       },
       timestamp: new Date().toISOString()

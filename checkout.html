@@ -7,67 +7,59 @@
 
   <script>
     window.adobeDataLayer = window.adobeDataLayer || [];
-
-    /*
-    // ❌ LEGACY PAGE LOAD (COMMENTED — DO NOT DELETE)
-    adobeDataLayer.push({
-      event: "pageLoad",
-      page: {
-        pageName: "Checkout",
-        pageType: "checkout",
-        pageUrl: location.href,
-        pageUrlWithoutQSP: location.origin + location.pathname,
-        referrer: document.referrer || ""
-      },
-      timestamp: new Date().toISOString()
-    });
-    */
   </script>
 
-  <!-- ✅ XDM PAGE LOAD (Web Details Only) -->
+  <!-- ✅ XDM PAGE LOAD (Page-level only, NO product details) -->
   <script>
     window.adobeDataLayer.push({
-      event: "pageLoad",
-      xdm: {
+      event: "pageLoaded",
+      xdmPageLoad: {
+        custData: {
+          customerID: "",
+          lang: "english",
+          loginStatus: "guest",
+          platform: "desktop website"
+        },
         web: {
           webPageDetails: {
-            pageName: "Checkout",
+            brand: "Fashion Store",
+            channel: "web|checkout",
+            pageName: "checkout",
             pageType: "checkout",
-            pageUrl: location.href,
-            pageUrlWithoutQSP: location.origin + location.pathname,
-            referrer: document.referrer || ""
+            pageUrl: window.location.href
           }
         }
-      },
-      timestamp: new Date().toISOString()
+      }
     });
 
-    // ✅ CHECKOUT VIEW EVENT - Push once on DOMContentLoaded
+    // ✅ CHECKOUT VIEW EVENT (scCheckout) - Push once on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', function() {
       const cart = JSON.parse(localStorage.getItem("cart")) || [];
-      if (cart.length > 0) {
-        window.adobeDataLayer.push({
-          event: "checkoutView",
-          xdm: {
-            commerce: {
-              productListItems: cart.map((item, index) => ({
-                SKU: item.sku || "SKU-" + Math.floor(Math.random() * 10000),
-                _id: "prod_" + Date.now() + "_" + index,
-                currencyCode: item.currency || "INR",
-                discountAmount: Math.floor(Math.random() * 50),
-                name: item.name || "Sample Product",
-                priceTotal: (item.price || 100) * (item.quantity || item.qty || 1),
-                product: item.product || "Default Product",
-                productAddMethod: item.addMethod || "checkout",
-                productImageUrl: item.imageUrl || item.img || "",
-                quantity: item.quantity || item.qty || 1,
-                refundAmount: 0,
-                unitOfMeasureCode: "EA"
-              }))
-            }
-          },
-          timestamp: new Date().toISOString()
+      if (cart.length > 0 && window.adl && window.adl.trackCheckout) {
+        let total = 0;
+        const products = cart.map(item => {
+          total += item.price * item.qty;
+          return {
+            sku: 'SKU-' + item.id,
+            productID: item.id,
+            productName: item.name,
+            brand: 'Fashion Store',
+            category: '',
+            price: item.price,
+            color: item.color || '',
+            size: '',
+            quantity: item.qty,
+            currencyCode: "INR"
+          };
         });
+        
+        const checkoutData = {
+          totalQuantity: cart.reduce((sum, item) => sum + item.qty, 0),
+          totalValue: total,
+          products: products
+        };
+        
+        window.adl.trackCheckout(checkoutData);
       }
     });
   </script>

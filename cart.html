@@ -7,39 +7,29 @@
 
   <script>
     window.adobeDataLayer = window.adobeDataLayer || [];
-
-    /*
-    // ❌ LEGACY PAGE LOAD (COMMENTED — DO NOT DELETE)
-    adobeDataLayer.push({
-      event: "pageLoad",
-      page: {
-        pageName: "Cart",
-        pageType: "cart",
-        pageUrl: location.href,
-        pageUrlWithoutQSP: location.origin + location.pathname,
-        referrer: document.referrer || ""
-      },
-      timestamp: new Date().toISOString()
-    });
-    */
   </script>
 
-  <!-- ✅ XDM PAGE LOAD (Web Details Only) -->
+  <!-- ✅ XDM PAGE LOAD (Page-level only, NO product details) -->
   <script>
     window.adobeDataLayer.push({
-      event: "pageLoad",
-      xdm: {
+      event: "pageLoaded",
+      xdmPageLoad: {
+        custData: {
+          customerID: "",
+          lang: "english",
+          loginStatus: "guest",
+          platform: "desktop website"
+        },
         web: {
           webPageDetails: {
-            pageName: "Cart",
+            brand: "Fashion Store",
+            channel: "web|cart",
+            pageName: "cart",
             pageType: "cart",
-            pageUrl: location.href,
-            pageUrlWithoutQSP: location.origin + location.pathname,
-            referrer: document.referrer || ""
+            pageUrl: window.location.href
           }
         }
-      },
-      timestamp: new Date().toISOString()
+      }
     });
   </script>
 
@@ -63,7 +53,7 @@
 
 <div class="container">
   <h2>Your Cart</h2>
-  <div id="cartItems"></div>
+  <div id="cartItems" class="cart-items"></div>
   <h3 id="cartTotal"></h3>
   <button id="clearCartBtn">Clear Cart</button><br><br>
   <a href="checkout.html" data-track-link="Checkout" data-link-type="cta">
@@ -108,6 +98,7 @@
           <button onclick="qty(${i.id},-1)">-</button>
           ${i.qty}
           <button onclick="qty(${i.id},1)">+</button>
+          <button data-track-link="Remove" data-link-type="removeFromCart" onclick="removeItem(${i.id})">Remove</button>
         </div>
       `;
     });
@@ -116,32 +107,30 @@
     updateMiniCart();
 
     /* ==============================
-       ✅ CART VIEW EVENT (Push only once on first render)
+       ✅ SHOPPING CART VIEW EVENT (scView)
        ============================== */
-    if (!cartViewPushed) {
-      window.adobeDataLayer.push({
-        event: "cartView",
-        xdm: {
-          commerce: {
-            productListItems: cart.map((item, index) => ({
-              SKU: item.sku || "SKU-" + Math.floor(Math.random() * 10000),
-              _id: "prod_" + Date.now() + "_" + index,
-              currencyCode: item.currency || "INR",
-              discountAmount: Math.floor(Math.random() * 50),
-              name: item.name || "Sample Product",
-              priceTotal: (item.price || 100) * (item.quantity || item.qty || 1),
-              product: item.product || "Default Product",
-              productAddMethod: item.addMethod || "cart",
-              productImageUrl: item.imageUrl || item.img || "",
-              quantity: item.quantity || item.qty || 1,
-              refundAmount: 0,
-              unitOfMeasureCode: "EA"
-            }))
-          }
-        },
-        timestamp: new Date().toISOString()
-      });
-      cartViewPushed = true;
+    if (!cartViewPushed && cart.length > 0) {
+      const cartData = {
+        totalQuantity: cart.reduce((sum, item) => sum + item.qty, 0),
+        totalValue: total,
+        products: cart.map(item => ({
+          sku: 'SKU-' + item.id,
+          productID: item.id,
+          productName: item.name,
+          brand: 'Fashion Store',
+          category: '',
+          price: item.price,
+          color: item.color || '',
+          size: '',
+          quantity: item.qty,
+          currencyCode: "INR"
+        }))
+      };
+      
+      if (window.adl && window.adl.trackShoppingCartView) {
+        window.adl.trackShoppingCartView(cartData, 'cart');
+        cartViewPushed = true;
+      }
     }
   }
 
@@ -149,7 +138,35 @@
     const i = cart.find(x => x.id === id);
     i.qty = Math.max(1, i.qty + d);
     saveCart(cart);
+    cartViewPushed = false;
     renderCart();
+  }
+
+  function removeItem(id) {
+    const item = cart.find(x => x.id === id);
+    if (item) {
+      // Fire linkClicked with removeFromCart
+      window.adl.trackLinkClick('remove ' + item.name, 'removeFromCart', 'cart-table', 'cart');
+      
+      // Fire removeFromCart event
+      window.adl.trackRemoveFromCart({
+        sku: 'SKU-' + item.id,
+        productID: item.id,
+        productName: item.name,
+        brand: 'Fashion Store',
+        category: '',
+        price: item.price,
+        color: item.color || '',
+        size: '',
+        quantity: item.qty
+      });
+      
+      // Remove from cart
+      cart = cart.filter(x => x.id !== id);
+      saveCart(cart);
+      cartViewPushed = false;
+      renderCart();
+    }
   }
 
   document.getElementById("clearCartBtn").onclick = () => {

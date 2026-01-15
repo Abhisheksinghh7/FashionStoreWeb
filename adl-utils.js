@@ -324,6 +324,7 @@ window.adl.trackPurchase = function(order) {
     },
     xdm: {
       commerce: {
+        orderID: order.orderID || "",
         productListItems: (order.products || order || []).map(p => {
           const complete = window.adl.getCompleteProductData(p);
           const discountAmount = complete.discount ? (complete.price * complete.discount / 100) : 0;

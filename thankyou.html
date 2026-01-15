@@ -42,16 +42,16 @@
         const products = cart.map(item => {
           total += item.price * item.qty;
           return {
-            sku: 'SKU-' + item.id,
-            productID: item.id,
-            productName: item.name,
-            brand: 'Fashion Store',
-            category: '',
+            id: item.id,
+            sku: item.sku || 'SKU-' + item.id,
+            name: item.name,
             price: item.price,
+            img: item.img,
+            qty: item.qty,
             color: item.color || '',
-            size: '',
-            quantity: item.qty,
-            currencyCode: "INR"
+            coupon: item.coupon || '',
+            discount: item.discount || 0,
+            category: item.category || ''
           };
         });
         

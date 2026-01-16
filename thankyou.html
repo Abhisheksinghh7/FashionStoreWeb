@@ -37,6 +37,23 @@
       const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
       const orderId = localStorage.getItem("checkoutTransactionId") || "ORD-" + Date.now();
       
+      // Generate random unique email (persisted in localStorage)
+      function generateRandomEmail() {
+        const randomString = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        const timestamp = Date.now();
+        return `customer_${timestamp}_${randomString.substring(0, 8)}@store.com`;
+      }
+      
+      // Get or generate email for this order
+      let orderEmail = localStorage.getItem("checkoutEmail");
+      const currentOrderId = localStorage.getItem("checkoutTransactionId");
+      
+      if (!orderEmail || localStorage.getItem("checkoutTransactionId") !== currentOrderId) {
+        // Generate new email if it doesn't exist or order ID has changed
+        orderEmail = generateRandomEmail();
+        localStorage.setItem("checkoutEmail", orderEmail);
+      }
+      
       if (cart.length > 0 && window.adl && window.adl.trackPurchase) {
         let total = 0;
         const products = cart.map(item => {
@@ -57,6 +74,7 @@
         
         const orderData = {
           orderID: orderId,
+          email: orderEmail,
           totalQuantity: cart.reduce((sum, item) => sum + item.qty, 0),
           subtotal: total,
           shipping: 0,
@@ -66,7 +84,6 @@
           customerEmail: '',
           firstName: '',
           lastName: '',
-          email: '',
           address: '',
           city: '',
           state: '',
@@ -120,12 +137,12 @@
 <script src="adl-auto-track.js"></script>
 
 <script>
+  // Generate random unique email
   const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
   const orderId = localStorage.getItem("checkoutTransactionId");
   let total = 0;
 
-  document.getElementById("orderId").textContent = orderId || "N/A";
-
+  document.getElementById("orderId").textContent = orderId || "N/A"
   cart.forEach(p => {
     const amt = p.price * p.qty;
     total += amt;

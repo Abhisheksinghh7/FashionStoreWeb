@@ -131,6 +131,9 @@ function validateCheckoutAndRedirect() {
   localStorage.setItem("checkoutCart", JSON.stringify(cart));
   localStorage.setItem("checkoutTransactionId", transactionId);
   localStorage.setItem("checkoutPaymentMethod", payment.value);
+  localStorage.setItem("checkoutCustomerEmail", email);
+  localStorage.setItem("checkoutCustomerName", name);
+  localStorage.setItem("checkoutCustomerPhone", phone);
 
   /* ❌ OLD getProductListItems - COMMENTED (using new XDM version instead)
   function getProductListItems() {

@@ -317,7 +317,8 @@ window.adl.trackPurchase = function(order) {
     event: "scPurchase",
     timestamp: new Date().toISOString(),
     custData: {
-      customerID: order.customerEmail || "",
+      customerID: "",
+      email: order.customerEmail || "",
       lang: "english",
       loginStatus: "guest",
       platform: websiteInfo.platform
@@ -325,7 +326,7 @@ window.adl.trackPurchase = function(order) {
     xdm: {
       commerce: {
         orderID: order.orderID || "",
-        email: order.email || "",
+        revenue: order.totalValue || 0,
         productListItems: (order.products || order || []).map(p => {
           const complete = window.adl.getCompleteProductData(p);
           const discountAmount = complete.discount ? (complete.price * complete.discount / 100) : 0;

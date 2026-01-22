@@ -1,45 +1,61 @@
+// =======================================
+// 🔥 GLOBAL ADOBE DATA LAYER INIT (ADDITIVE)
+// =======================================
+window.adobeDataLayer = window.adobeDataLayer || [];
+
+// Debug logger (non-breaking)
+(function () {
+  const originalPush = window.adobeDataLayer.push;
+  window.adobeDataLayer.push = function () {
+    console.log("🟢 adobeDataLayer.push →", arguments[0]);
+    return originalPush.apply(this, arguments);
+  };
+})();
+
+// =======================================
+// 🧠 PRODUCT ENRICHMENT (ALL 8 PRODUCTS)
+// =======================================
+const PRODUCT_ENRICHMENT_MAP = {
+  "T-Shirt": { productCategory: "fashion", productMaterial: "cotton", productRating: 4.4 },
+  "Jeans": { productCategory: "fashion", productMaterial: "denim", productRating: 4.5 },
+  "Shoes": { productCategory: "footwear", productMaterial: "leather", productRating: 4.6 },
+  "Jacket": { productCategory: "fashion", productMaterial: "polyester", productRating: 4.3 },
+  "Watch": { productCategory: "electronics", productMaterial: "fiber", productRating: 4.7 },
+  "Sunglasses": { productCategory: "accessories", productMaterial: "plastic", productRating: 4.2 },
+  "Cap": { productCategory: "accessories", productMaterial: "cotton", productRating: 4.1 },
+  "Backpack": { productCategory: "bags", productMaterial: "nylon", productRating: 4.5 }
+};
+
+// Normalize product safely
+function normalizeProduct(product) {
+  const name = product.name || product.productName || "";
+  const img = product.img || product.productImageUrl || "";
+
+  const enrich = PRODUCT_ENRICHMENT_MAP[name] || {};
+
+  return {
+    ...product,
+    name,
+    img,
+    productImageUrl: img,
+    _caterpillarsigns: {
+      productCategory: enrich.productCategory || "unknown",
+      productMaterial: enrich.productMaterial || "unknown",
+      productRating: enrich.productRating || 0
+    }
+  };
+}
+
+
+// =======================================
 // ===== KING CODE ORIGINAL FUNCTIONS =====
+// =======================================
 function getCart() {
   return JSON.parse(localStorage.getItem("cart")) || [];
 }
 
 function saveCart(cart) {
   localStorage.setItem("cart", JSON.stringify(cart));
-}
-
-/* ======================================================
-   🔵 ADDITION: PRODUCT ATTRIBUTE MASTER (ALL 8 PRODUCTS)
-   ====================================================== */
-function getProductAttributesById(id) {
-  const map = {
-    1: { productCategory: "fashion", productMaterial: "cotton", productRating: 4.2 }, // T-Shirt
-    2: { productCategory: "fashion", productMaterial: "denim", productRating: 4.3 }, // Jeans
-    3: { productCategory: "fashion", productMaterial: "polyester", productRating: 4.5 }, // Jacket
-    4: { productCategory: "footwear", productMaterial: "leather", productRating: 4.4 }, // Shoes
-    5: { productCategory: "fashion", productMaterial: "cotton", productRating: 4.1 }, // Shirt
-    6: { productCategory: "electronics", productMaterial: "plastic", productRating: 4.6 }, // Camera
-    7: { productCategory: "electronics", productMaterial: "plastic", productRating: 4.3 }, // Headphone
-    8: { productCategory: "electronics", productMaterial: "fiber", productRating: 4.6 } // Smartwatch
-  };
-
-  return map[id] || {
-    productCategory: "others",
-    productMaterial: "",
-    productRating: 0
-  };
-}
-
-/* ======================================================
-   🔵 ADDITION: SAFE PRODUCT NORMALIZER
-   ====================================================== */
-function normalizeProduct(item) {
-  const catalog = window.adl?.productCatalog?.[item.id] || {};
-  return {
-    id: item.id,
-    name: item.name || catalog.name || "",
-    img: item.img || catalog.img || "",
-    price: item.price || catalog.price || 0
-  };
 }
 
 function addToCart(product) {
@@ -82,56 +98,73 @@ function addToCart(product) {
           priceTotal: product.price || 0,
           product: "Default Product",
           productAddMethod: "cart",
-          productImageUrl: product.img || '',
-          quantity: 1,
+          productImageUrl: product.img || product.productImageUrl || '',
+          quantity: product.quantity || 1,
           refundAmount: 0,
           unitOfMeasureCode: "EA",
-          _id: 'prod_' + product.id,
-          brand: "Fashion Store"
+          _id: product._id || 'prod_' + product.id,
+          color: product.color || '',
+          coupon: product.coupon || '',
+          category: product.category || '',
+          size: product.size || '',
+          brand: "Fashion Store",
+          _caterpillarsigns: product._caterpillarsigns || {}
         }]
       }
     },
     timestamp: new Date().toISOString()
   });
 
+  // ⏳ allow AEP to process
+  setTimeout(() => location.href = "cart.html", 300);
+}
+
+function updateMiniCart() {
+  const cart = getCart();
+  const count = cart.reduce((sum, i) => sum + i.qty, 0);
+  const el = document.getElementById("miniCartCount");
+  if (el) el.textContent = count;
+}
+
+function goToCart() {
   location.href = "cart.html";
 }
 
-/* ======================================================
-   🔵 ADDITION: ENRICH productListItems BEFORE ORDER
-   ====================================================== */
-function enrichProductListItems(cart) {
-  return cart.map(i => {
-    const normalized = normalizeProduct(i);
-    const attrs = getProductAttributesById(i.id);
-    const discountAmount = i.discount ? (i.price * i.discount / 100) : 0;
+document.addEventListener("DOMContentLoaded", updateMiniCart);
 
+
+// =======================================
+// 🛒 CART VIEW EVENT (ADDITIVE)
+// =======================================
+document.addEventListener("DOMContentLoaded", function () {
+  if (!location.pathname.includes("cart.html")) return;
+
+  const cart = getCart();
+  if (!cart.length) return;
+
+  const items = cart.map(i => {
+    const p = normalizeProduct(i);
     return {
-      _id: 'prod_' + i.id,
-      SKU: i.sku || 'SKU-' + i.id,
-      name: normalized.name,
-      product: "Default Product",
-      quantity: i.qty || 1,
+      SKU: p.sku || "SKU-" + p.id,
+      name: p.name,
+      priceTotal: p.price * p.qty,
+      quantity: p.qty,
       currencyCode: "INR",
-      priceTotal: i.price * i.qty,
-      discountAmount: discountAmount,
-      productAddMethod: "cart",
-      productImageUrl: normalized.img,
-      unitOfMeasureCode: "EA",
-      returnItem: { refundAmount: 0 },
-      productCategories: [],
-      selectedOptions: [],
-      _experience: { standard: {} },
-
-      /* 🔥 CUSTOM NESTED OBJECT */
-      _caterpillarsigns: {
-        productCategory: attrs.productCategory,
-        productMaterial: attrs.productMaterial,
-        productRating: attrs.productRating
-      }
+      productImageUrl: p.productImageUrl,
+      _caterpillarsigns: p._caterpillarsigns
     };
   });
-}
+
+  window.adobeDataLayer.push({
+    event: "cartView",
+    xdm: {
+      commerce: {
+        productListItems: items
+      }
+    },
+    timestamp: new Date().toISOString()
+  });
+});
 
 // ===================================================
 // ===== CHECKOUT PAGE FINAL VALIDATION & REDIRECT ====
@@ -139,7 +172,45 @@ function enrichProductListItems(cart) {
 function validateCheckoutAndRedirect() {
   const cart = getCart();
 
-  if (!cart.length) return;
+  const custName = document.getElementById("custName");
+  const custPhone = document.getElementById("custPhone");
+  const custEmail = document.getElementById("custEmail");
+
+  const modal = document.getElementById("modal");
+  const mTitle = document.getElementById("mTitle");
+  const mText = document.getElementById("mText");
+  const okBtn = document.getElementById("okBtn");
+
+  if (!modal) return;
+
+  const name = custName?.value.trim();
+  const phone = custPhone?.value.trim();
+  const email = custEmail?.value.trim();
+  const payment = document.querySelector('input[name="payment"]:checked');
+
+  if (cart.length === 0) {
+    mTitle.textContent = "Empty Cart";
+    mText.textContent = "Please add products before checkout";
+    modal.style.display = "flex";
+    okBtn.onclick = () => location.href = "products.html";
+    return;
+  }
+
+  if (!name || !phone || !email) {
+    mTitle.textContent = "Missing Details";
+    mText.textContent = "Please fill Name, Phone and Email";
+    modal.style.display = "flex";
+    okBtn.onclick = () => modal.style.display = "none";
+    return;
+  }
+
+  if (!payment) {
+    mTitle.textContent = "Payment Required";
+    mText.textContent = "Please select a payment method";
+    modal.style.display = "flex";
+    okBtn.onclick = () => modal.style.display = "none";
+    return;
+  }
 
   const transactionId = "TXN" + Date.now();
   const totalAmount = cart.reduce((s, i) => s + i.price * i.qty, 0);
@@ -147,9 +218,6 @@ function validateCheckoutAndRedirect() {
   localStorage.setItem("checkoutCart", JSON.stringify(cart));
   localStorage.setItem("checkoutTransactionId", transactionId);
 
-  const enrichedItems = enrichProductListItems(cart);
-
-  window.adobeDataLayer = window.adobeDataLayer || [];
   window.adobeDataLayer.push({
     event: "orderPlaced",
     xdm: {
@@ -158,15 +226,53 @@ function validateCheckoutAndRedirect() {
           orderID: transactionId,
           priceTotal: totalAmount
         },
-        productListItems: enrichedItems
+        productListItems: cart.map(i => {
+          const p = normalizeProduct(i);
+          return {
+            SKU: p.sku || "SKU-" + p.id,
+            name: p.name,
+            priceTotal: p.price * p.qty,
+            quantity: p.qty,
+            productImageUrl: p.productImageUrl,
+            currencyCode: "INR",
+            _caterpillarsigns: p._caterpillarsigns
+          };
+        })
       }
     },
     timestamp: new Date().toISOString()
   });
 
-  location.href = "payment-gateway.html";
+  setTimeout(() => location.href = "payment-gateway.html", 300);
 }
 
-document
-  .getElementById("placeOrderBtn")
+document.getElementById("placeOrderBtn")
   ?.addEventListener("click", validateCheckoutAndRedirect);
+
+
+// ================================
+// GLOBAL CLICK TRACKING (UNCHANGED)
+// ================================
+document.addEventListener("DOMContentLoaded", function () {
+  document.body.addEventListener("click", function (e) {
+    const el = e.target.closest("a,button");
+    if (!el) return;
+
+    window.adobeDataLayer.push({
+      event: "linkClicked",
+      xdm: {
+        web: {
+          webInteraction: {
+            linkName: el.innerText?.trim() || "",
+            linkType: el.tagName,
+            linkPosition: "body",
+            linkPageName: document.title,
+            linkURL: el.getAttribute("href") || ""
+          }
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+  });
+});
+

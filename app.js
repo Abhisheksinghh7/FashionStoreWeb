@@ -20,10 +20,10 @@ const PRODUCT_ENRICHMENT_MAP = {
   "Jeans": { productCategory: "fashion", productMaterial: "denim", productRating: 4.5 },
   "Shoes": { productCategory: "footwear", productMaterial: "leather", productRating: 4.6 },
   "Jacket": { productCategory: "fashion", productMaterial: "polyester", productRating: 4.3 },
-  "Watch": { productCategory: "electronics", productMaterial: "fiber", productRating: 4.7 },
-  "Sunglasses": { productCategory: "accessories", productMaterial: "plastic", productRating: 4.2 },
-  "Cap": { productCategory: "accessories", productMaterial: "cotton", productRating: 4.1 },
-  "Backpack": { productCategory: "bags", productMaterial: "nylon", productRating: 4.5 }
+  "Smartwatch": { productCategory: "electronics", productMaterial: "fiber", productRating: 4.7 },
+  "Shirt": { productCategory: "fashion", productMaterial: "cotton", productRating: 4.2 },
+  "Camera": { productCategory: "electronics", productMaterial: "fiber", productRating: 4.1 },
+  "Headphone": { productCategory: "electronics", productMaterial: "fiber", productRating: 4.5 }
 };
 
 // =======================================
@@ -278,3 +278,4 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
+

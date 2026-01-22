@@ -1,55 +1,4 @@
-// =======================================
-// 🔥 GLOBAL ADOBE DATA LAYER INIT (ADDITIVE)
-// =======================================
-window.adobeDataLayer = window.adobeDataLayer || [];
-
-// Debug logger (non-breaking)
-(function () {
-  const originalPush = window.adobeDataLayer.push;
-  window.adobeDataLayer.push = function () {
-    console.log("🟢 adobeDataLayer.push →", arguments[0]);
-    return originalPush.apply(this, arguments);
-  };
-})();
-
-// =======================================
-// 🧠 PRODUCT ENRICHMENT (ALL 8 PRODUCTS)
-// =======================================
-const PRODUCT_ENRICHMENT_MAP = {
-  "T-Shirt": { productCategory: "fashion", productMaterial: "cotton", productRating: 4.4 },
-  "Jeans": { productCategory: "fashion", productMaterial: "denim", productRating: 4.5 },
-  "Shoes": { productCategory: "footwear", productMaterial: "leather", productRating: 4.6 },
-  "Jacket": { productCategory: "fashion", productMaterial: "polyester", productRating: 4.3 },
-  "Watch": { productCategory: "electronics", productMaterial: "fiber", productRating: 4.7 },
-  "Sunglasses": { productCategory: "accessories", productMaterial: "plastic", productRating: 4.2 },
-  "Cap": { productCategory: "accessories", productMaterial: "cotton", productRating: 4.1 },
-  "Backpack": { productCategory: "bags", productMaterial: "nylon", productRating: 4.5 }
-};
-
-// Normalize product safely
-function normalizeProduct(product) {
-  const name = product.name || product.productName || "";
-  const img = product.img || product.productImageUrl || "";
-
-  const enrich = PRODUCT_ENRICHMENT_MAP[name] || {};
-
-  return {
-    ...product,
-    name,
-    img,
-    productImageUrl: img,
-    _caterpillarsigns: {
-      productCategory: enrich.productCategory || "unknown",
-      productMaterial: enrich.productMaterial || "unknown",
-      productRating: enrich.productRating || 0
-    }
-  };
-}
-
-
-// =======================================
 // ===== KING CODE ORIGINAL FUNCTIONS =====
-// =======================================
 function getCart() {
   return JSON.parse(localStorage.getItem("cart")) || [];
 }
@@ -84,7 +33,6 @@ function addToCart(product) {
 
   window.adobeDataLayer = window.adobeDataLayer || [];
   const discountAmount = product.discount ? (product.price * product.discount / 100) : 0;
-
   window.adobeDataLayer.push({
     event: "addToCart",
     xdm: {
@@ -107,16 +55,14 @@ function addToCart(product) {
           coupon: product.coupon || '',
           category: product.category || '',
           size: product.size || '',
-          brand: "Fashion Store",
-          _caterpillarsigns: product._caterpillarsigns || {}
+          brand: "Fashion Store"
         }]
       }
     },
     timestamp: new Date().toISOString()
   });
 
-  // ⏳ allow AEP to process
-  setTimeout(() => location.href = "cart.html", 300);
+  location.href = "cart.html";
 }
 
 function updateMiniCart() {
@@ -132,39 +78,6 @@ function goToCart() {
 
 document.addEventListener("DOMContentLoaded", updateMiniCart);
 
-
-// =======================================
-// 🛒 CART VIEW EVENT (ADDITIVE)
-// =======================================
-document.addEventListener("DOMContentLoaded", function () {
-  if (!location.pathname.includes("cart.html")) return;
-
-  const cart = getCart();
-  if (!cart.length) return;
-
-  const items = cart.map(i => {
-    const p = normalizeProduct(i);
-    return {
-      SKU: p.sku || "SKU-" + p.id,
-      name: p.name,
-      priceTotal: p.price * p.qty,
-      quantity: p.qty,
-      currencyCode: "INR",
-      productImageUrl: p.productImageUrl,
-      _caterpillarsigns: p._caterpillarsigns
-    };
-  });
-
-  window.adobeDataLayer.push({
-    event: "cartView",
-    xdm: {
-      commerce: {
-        productListItems: items
-      }
-    },
-    timestamp: new Date().toISOString()
-  });
-});
 
 // ===================================================
 // ===== CHECKOUT PAGE FINAL VALIDATION & REDIRECT ====
@@ -217,7 +130,23 @@ function validateCheckoutAndRedirect() {
 
   localStorage.setItem("checkoutCart", JSON.stringify(cart));
   localStorage.setItem("checkoutTransactionId", transactionId);
+  localStorage.setItem("checkoutPaymentMethod", payment.value);
+  localStorage.setItem("checkoutCustomerEmail", email);
+  localStorage.setItem("checkoutCustomerName", name);
+  localStorage.setItem("checkoutCustomerPhone", phone);
 
+  /* ❌ OLD getProductListItems - COMMENTED (using new XDM version instead)
+  function getProductListItems() {
+    return cart.map(i => ({
+      SKU: String(i.id),
+      name: i.name,
+      priceTotal: i.price * i.qty,
+      quantity: i.qty
+    }));
+  }
+  */
+
+  window.adobeDataLayer = window.adobeDataLayer || [];
   window.adobeDataLayer.push({
     event: "orderPlaced",
     xdm: {
@@ -227,15 +156,26 @@ function validateCheckoutAndRedirect() {
           priceTotal: totalAmount
         },
         productListItems: cart.map(i => {
-          const p = normalizeProduct(i);
+          const discountAmount = i.discount ? (i.price * i.discount / 100) : 0;
           return {
-            SKU: p.sku || "SKU-" + p.id,
-            name: p.name,
-            priceTotal: p.price * p.qty,
-            quantity: p.qty,
-            productImageUrl: p.productImageUrl,
+            SKU: i.sku || 'SKU-' + i.id,
             currencyCode: "INR",
-            _caterpillarsigns: p._caterpillarsigns
+            discountAmount: discountAmount,
+            discountPercent: i.discount || 0,
+            name: i.name || '',
+            priceTotal: i.price * i.qty,
+            product: "Default Product",
+            productAddMethod: "cart",
+            productImageUrl: i.img || i.productImageUrl || '',
+            quantity: i.qty || 1,
+            refundAmount: 0,
+            unitOfMeasureCode: "EA",
+            _id: i._id || 'prod_' + i.id,
+            color: i.color || '',
+            coupon: i.coupon || '',
+            category: i.category || '',
+            size: i.size || '',
+            brand: "Fashion Store"
           };
         })
       }
@@ -243,20 +183,32 @@ function validateCheckoutAndRedirect() {
     timestamp: new Date().toISOString()
   });
 
-  setTimeout(() => location.href = "payment-gateway.html", 300);
+  location.href = "payment-gateway.html";
 }
 
-document.getElementById("placeOrderBtn")
+document
+  .getElementById("placeOrderBtn")
   ?.addEventListener("click", validateCheckoutAndRedirect);
 
 
 // ================================
-// GLOBAL CLICK TRACKING (UNCHANGED)
+// GLOBAL CLICK TRACKING (XDM-ONLY)
 // ================================
 document.addEventListener("DOMContentLoaded", function () {
+
   document.body.addEventListener("click", function (e) {
     const el = e.target.closest("a,button");
     if (!el) return;
+
+    let linkPosition = "body";
+    if (el.closest("header")) linkPosition = "header";
+    else if (el.closest("footer")) linkPosition = "footer";
+    else if (el.closest(".hero")) linkPosition = "hero";
+    else if (el.closest(".products")) linkPosition = "product_listing";
+    else if (el.closest(".cart-item")) linkPosition = "cart";
+    else if (el.closest(".container")) linkPosition = "content";
+
+    window.adobeDataLayer = window.adobeDataLayer || [];
 
     window.adobeDataLayer.push({
       event: "linkClicked",
@@ -265,7 +217,7 @@ document.addEventListener("DOMContentLoaded", function () {
           webInteraction: {
             linkName: el.innerText?.trim() || "",
             linkType: el.tagName,
-            linkPosition: "body",
+            linkPosition: linkPosition,
             linkPageName: document.title,
             linkURL: el.getAttribute("href") || ""
           }
@@ -273,7 +225,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       timestamp: new Date().toISOString()
     });
+
   });
+
 });
-
-

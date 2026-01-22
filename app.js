@@ -13,57 +13,25 @@ window.adobeDataLayer = window.adobeDataLayer || [];
 })();
 
 // =======================================
-// 🧠 PRODUCT ENRICHMENT RULES (ALL PRODUCTS)
+// 🧠 PRODUCT ENRICHMENT (ALL 8 PRODUCTS)
 // =======================================
-const PRODUCT_ENRICHMENT_RULES = [
-  { match: ["shirt", "t-shirt"], data: { productCategory: "fashion", productMaterial: "cotton", productRating: 4.4 } },
-  { match: ["jeans"], data: { productCategory: "fashion", productMaterial: "denim", productRating: 4.5 } },
-  { match: ["shoe"], data: { productCategory: "footwear", productMaterial: "leather", productRating: 4.6 } },
-  { match: ["jacket"], data: { productCategory: "fashion", productMaterial: "polyester", productRating: 4.3 } },
-  { match: ["watch", "smartwatch"], data: { productCategory: "electronics", productMaterial: "fiber", productRating: 4.7 } },
-  { match: ["sunglass"], data: { productCategory: "accessories", productMaterial: "plastic", productRating: 4.2 } },
-  { match: ["cap"], data: { productCategory: "accessories", productMaterial: "cotton", productRating: 4.1 } },
-  { match: ["bag", "backpack"], data: { productCategory: "bags", productMaterial: "nylon", productRating: 4.5 } },
-  { match: ["camera"], data: { productCategory: "electronics", productMaterial: "plastic", productRating: 4.6 } },
-  { match: ["headphone", "earphone"], data: { productCategory: "electronics", productMaterial: "plastic", productRating: 4.5 } }
-];
+const PRODUCT_ENRICHMENT_MAP = {
+  "T-Shirt": { productCategory: "fashion", productMaterial: "cotton", productRating: 4.4 },
+  "Jeans": { productCategory: "fashion", productMaterial: "denim", productRating: 4.5 },
+  "Shoes": { productCategory: "footwear", productMaterial: "leather", productRating: 4.6 },
+  "Jacket": { productCategory: "fashion", productMaterial: "polyester", productRating: 4.3 },
+  "Watch": { productCategory: "electronics", productMaterial: "fiber", productRating: 4.7 },
+  "Sunglasses": { productCategory: "accessories", productMaterial: "plastic", productRating: 4.2 },
+  "Cap": { productCategory: "accessories", productMaterial: "cotton", productRating: 4.1 },
+  "Backpack": { productCategory: "bags", productMaterial: "nylon", productRating: 4.5 }
+};
 
-// =======================================
-// 🔎 GET ENRICHMENT BY PRODUCT NAME
-// =======================================
-function getEnrichmentByName(name = "") {
-  const lowerName = name.toLowerCase();
-
-  for (let rule of PRODUCT_ENRICHMENT_RULES) {
-    if (rule.match.some(k => lowerName.includes(k))) {
-      return rule.data;
-    }
-  }
-
-  return {
-    productCategory: "unknown",
-    productMaterial: "unknown",
-    productRating: 0
-  };
-}
-
-// =======================================
-// 🧩 NORMALIZE PRODUCT (GLOBAL)
-// =======================================
+// Normalize product safely
 function normalizeProduct(product) {
-  const name =
-    product.name ||
-    product.productName ||
-    product.title ||
-    "";
+  const name = product.name || product.productName || "";
+  const img = product.img || product.productImageUrl || "";
 
-  const img =
-    product.img ||
-    product.productImageUrl ||
-    product.image ||
-    "";
-
-  const enrich = getEnrichmentByName(name);
+  const enrich = PRODUCT_ENRICHMENT_MAP[name] || {};
 
   return {
     ...product,
@@ -71,9 +39,9 @@ function normalizeProduct(product) {
     img,
     productImageUrl: img,
     _caterpillarsigns: {
-      productCategory: enrich.productCategory,
-      productMaterial: enrich.productMaterial,
-      productRating: enrich.productRating
+      productCategory: enrich.productCategory || "unknown",
+      productMaterial: enrich.productMaterial || "unknown",
+      productRating: enrich.productRating || 0
     }
   };
 }
@@ -83,19 +51,13 @@ function normalizeProduct(product) {
 // ===== KING CODE ORIGINAL FUNCTIONS =====
 // =======================================
 function getCart() {
-  const cart = JSON.parse(localStorage.getItem("cart")) || [];
-  cart.forEach(ensureCaterpillarData);
-  return cart;
+  return JSON.parse(localStorage.getItem("cart")) || [];
 }
 
 function saveCart(cart) {
-  cart.forEach(ensureCaterpillarData);
   localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-// =======================================
-// 🛒 ADD TO CART (SAFE + ENRICHED)
-// =======================================
 function addToCart(product) {
   let cart = getCart();
   const existing = cart.find(i => i.id === product.id);
@@ -103,27 +65,24 @@ function addToCart(product) {
   if (existing) {
     existing.qty += 1;
   } else {
-    const enriched = normalizeProduct(product);
-
     cart.push({
       id: product.id,
-      name: enriched.name,
+      name: product.name,
       price: product.price,
-      img: enriched.img,
+      img: product.img,
       qty: 1,
       color: product.color || '',
       coupon: product.coupon || '',
       discount: product.discount || 0,
       category: product.category || '',
       sku: product.sku || 'SKU-' + product.id,
-      size: product.size || '',
-      productImageUrl: enriched.productImageUrl,
-      _caterpillarsigns: enriched._caterpillarsigns
+      size: product.size || ''
     });
   }
 
   saveCart(cart);
 
+  window.adobeDataLayer = window.adobeDataLayer || [];
   const discountAmount = product.discount ? (product.price * product.discount / 100) : 0;
 
   window.adobeDataLayer.push({
@@ -132,25 +91,34 @@ function addToCart(product) {
       commerce: {
         productListItems: [{
           SKU: product.sku || 'SKU-' + product.id,
-          name: product.name || '',
-          quantity: 1,
-          priceTotal: product.price || 0,
           currencyCode: "INR",
           discountAmount: discountAmount,
-          productImageUrl: product.img || '',
-          _caterpillarsigns: normalizeProduct(product)._caterpillarsigns
+          discountPercent: product.discount || 0,
+          name: product.name || '',
+          priceTotal: product.price || 0,
+          product: "Default Product",
+          productAddMethod: "cart",
+          productImageUrl: product.img || product.productImageUrl || '',
+          quantity: product.quantity || 1,
+          refundAmount: 0,
+          unitOfMeasureCode: "EA",
+          _id: product._id || 'prod_' + product.id,
+          color: product.color || '',
+          coupon: product.coupon || '',
+          category: product.category || '',
+          size: product.size || '',
+          brand: "Fashion Store",
+          _caterpillarsigns: product._caterpillarsigns || {}
         }]
       }
     },
     timestamp: new Date().toISOString()
   });
 
+  // ⏳ allow AEP to process
   setTimeout(() => location.href = "cart.html", 300);
 }
 
-// =======================================
-// MINI CART
-// =======================================
 function updateMiniCart() {
   const cart = getCart();
   const count = cart.reduce((sum, i) => sum + i.qty, 0);
@@ -164,8 +132,9 @@ function goToCart() {
 
 document.addEventListener("DOMContentLoaded", updateMiniCart);
 
+
 // =======================================
-// 🛒 CART VIEW EVENT
+// 🛒 CART VIEW EVENT (ADDITIVE)
 // =======================================
 document.addEventListener("DOMContentLoaded", function () {
   if (!location.pathname.includes("cart.html")) return;
@@ -173,19 +142,24 @@ document.addEventListener("DOMContentLoaded", function () {
   const cart = getCart();
   if (!cart.length) return;
 
+  const items = cart.map(i => {
+    const p = normalizeProduct(i);
+    return {
+      SKU: p.sku || "SKU-" + p.id,
+      name: p.name,
+      priceTotal: p.price * p.qty,
+      quantity: p.qty,
+      currencyCode: "INR",
+      productImageUrl: p.productImageUrl,
+      _caterpillarsigns: p._caterpillarsigns
+    };
+  });
+
   window.adobeDataLayer.push({
     event: "cartView",
     xdm: {
       commerce: {
-        productListItems: cart.map(i => ({
-          SKU: i.sku,
-          name: i.name,
-          quantity: i.qty,
-          priceTotal: i.price * i.qty,
-          currencyCode: "INR",
-          productImageUrl: i.productImageUrl,
-          _caterpillarsigns: i._caterpillarsigns
-        }))
+        productListItems: items
       }
     },
     timestamp: new Date().toISOString()
@@ -193,11 +167,50 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ===================================================
-// ===== CHECKOUT PAGE FINAL EVENT ====================
+// ===== CHECKOUT PAGE FINAL VALIDATION & REDIRECT ====
 // ===================================================
 function validateCheckoutAndRedirect() {
   const cart = getCart();
-  if (!cart.length) return;
+
+  const custName = document.getElementById("custName");
+  const custPhone = document.getElementById("custPhone");
+  const custEmail = document.getElementById("custEmail");
+
+  const modal = document.getElementById("modal");
+  const mTitle = document.getElementById("mTitle");
+  const mText = document.getElementById("mText");
+  const okBtn = document.getElementById("okBtn");
+
+  if (!modal) return;
+
+  const name = custName?.value.trim();
+  const phone = custPhone?.value.trim();
+  const email = custEmail?.value.trim();
+  const payment = document.querySelector('input[name="payment"]:checked');
+
+  if (cart.length === 0) {
+    mTitle.textContent = "Empty Cart";
+    mText.textContent = "Please add products before checkout";
+    modal.style.display = "flex";
+    okBtn.onclick = () => location.href = "products.html";
+    return;
+  }
+
+  if (!name || !phone || !email) {
+    mTitle.textContent = "Missing Details";
+    mText.textContent = "Please fill Name, Phone and Email";
+    modal.style.display = "flex";
+    okBtn.onclick = () => modal.style.display = "none";
+    return;
+  }
+
+  if (!payment) {
+    mTitle.textContent = "Payment Required";
+    mText.textContent = "Please select a payment method";
+    modal.style.display = "flex";
+    okBtn.onclick = () => modal.style.display = "none";
+    return;
+  }
 
   const transactionId = "TXN" + Date.now();
   const totalAmount = cart.reduce((s, i) => s + i.price * i.qty, 0);
@@ -213,15 +226,18 @@ function validateCheckoutAndRedirect() {
           orderID: transactionId,
           priceTotal: totalAmount
         },
-        productListItems: cart.map(i => ({
-          SKU: i.sku,
-          name: i.name,
-          quantity: i.qty,
-          priceTotal: i.price * i.qty,
-          currencyCode: "INR",
-          productImageUrl: i.productImageUrl,
-          _caterpillarsigns: i._caterpillarsigns
-        }))
+        productListItems: cart.map(i => {
+          const p = normalizeProduct(i);
+          return {
+            SKU: p.sku || "SKU-" + p.id,
+            name: p.name,
+            priceTotal: p.price * p.qty,
+            quantity: p.qty,
+            productImageUrl: p.productImageUrl,
+            currencyCode: "INR",
+            _caterpillarsigns: p._caterpillarsigns
+          };
+        })
       }
     },
     timestamp: new Date().toISOString()
@@ -230,39 +246,9 @@ function validateCheckoutAndRedirect() {
   setTimeout(() => location.href = "payment-gateway.html", 300);
 }
 
-document
-  .getElementById("placeOrderBtn")
+document.getElementById("placeOrderBtn")
   ?.addEventListener("click", validateCheckoutAndRedirect);
 
-// =======================================
-// 🎉 THANK YOU PAGE EVENT
-// =======================================
-document.addEventListener("DOMContentLoaded", function () {
-  if (!location.pathname.includes("thankyou")) return;
-
-  const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
-  if (!cart.length) return;
-
-  cart.forEach(ensureCaterpillarData);
-
-  window.adobeDataLayer.push({
-    event: "purchase",
-    xdm: {
-      commerce: {
-        productListItems: cart.map(i => ({
-          SKU: i.sku,
-          name: i.name,
-          quantity: i.qty,
-          priceTotal: i.price * i.qty,
-          currencyCode: "INR",
-          productImageUrl: i.productImageUrl,
-          _caterpillarsigns: i._caterpillarsigns
-        }))
-      }
-    },
-    timestamp: new Date().toISOString()
-  });
-});
 
 // ================================
 // GLOBAL CLICK TRACKING (UNCHANGED)
@@ -289,5 +275,3 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
-
-

@@ -13,27 +13,57 @@ window.adobeDataLayer = window.adobeDataLayer || [];
 })();
 
 // =======================================
-// 🧠 PRODUCT ENRICHMENT (ALL 8 PRODUCTS)
+// 🧠 PRODUCT ENRICHMENT RULES (ALL PRODUCTS)
 // =======================================
-const PRODUCT_ENRICHMENT_MAP = {
-  "T-Shirt": { productCategory: "fashion", productMaterial: "cotton", productRating: 4.4 },
-  "Jeans": { productCategory: "fashion", productMaterial: "denim", productRating: 4.5 },
-  "Shoes": { productCategory: "footwear", productMaterial: "leather", productRating: 4.6 },
-  "Jacket": { productCategory: "fashion", productMaterial: "polyester", productRating: 4.3 },
-  "Smartwatch": { productCategory: "electronics", productMaterial: "fiber", productRating: 4.7 },
-  "Shirt": { productCategory: "fashion", productMaterial: "cotton", productRating: 4.2 },
-  "Camera": { productCategory: "electronics", productMaterial: "fiber", productRating: 4.1 },
-  "Headphone": { productCategory: "electronics", productMaterial: "fiber", productRating: 4.5 }
-};
+const PRODUCT_ENRICHMENT_RULES = [
+  { match: ["shirt", "t-shirt"], data: { productCategory: "fashion", productMaterial: "cotton", productRating: 4.4 } },
+  { match: ["jeans"], data: { productCategory: "fashion", productMaterial: "denim", productRating: 4.5 } },
+  { match: ["shoe"], data: { productCategory: "footwear", productMaterial: "leather", productRating: 4.6 } },
+  { match: ["jacket"], data: { productCategory: "fashion", productMaterial: "polyester", productRating: 4.3 } },
+  { match: ["watch", "smartwatch"], data: { productCategory: "electronics", productMaterial: "fiber", productRating: 4.7 } },
+  { match: ["sunglass"], data: { productCategory: "accessories", productMaterial: "plastic", productRating: 4.2 } },
+  { match: ["cap"], data: { productCategory: "accessories", productMaterial: "cotton", productRating: 4.1 } },
+  { match: ["bag", "backpack"], data: { productCategory: "bags", productMaterial: "nylon", productRating: 4.5 } },
+  { match: ["camera"], data: { productCategory: "electronics", productMaterial: "plastic", productRating: 4.6 } },
+  { match: ["headphone", "earphone"], data: { productCategory: "electronics", productMaterial: "plastic", productRating: 4.5 } }
+];
+
+// =======================================
+// 🔎 GET ENRICHMENT BY PRODUCT NAME
+// =======================================
+function getEnrichmentByName(name = "") {
+  const lowerName = name.toLowerCase();
+
+  for (let rule of PRODUCT_ENRICHMENT_RULES) {
+    if (rule.match.some(k => lowerName.includes(k))) {
+      return rule.data;
+    }
+  }
+
+  return {
+    productCategory: "unknown",
+    productMaterial: "unknown",
+    productRating: 0
+  };
+}
 
 // =======================================
 // 🧩 NORMALIZE PRODUCT (GLOBAL)
 // =======================================
 function normalizeProduct(product) {
-  const name = product.name || product.productName || "";
-  const img = product.img || product.productImageUrl || "";
+  const name =
+    product.name ||
+    product.productName ||
+    product.title ||
+    "";
 
-  const enrich = PRODUCT_ENRICHMENT_MAP[name] || {};
+  const img =
+    product.img ||
+    product.productImageUrl ||
+    product.image ||
+    "";
+
+  const enrich = getEnrichmentByName(name);
 
   return {
     ...product,
@@ -41,32 +71,13 @@ function normalizeProduct(product) {
     img,
     productImageUrl: img,
     _caterpillarsigns: {
-      productCategory: enrich.productCategory || "unknown",
-      productMaterial: enrich.productMaterial || "unknown",
-      productRating: enrich.productRating || 0
+      productCategory: enrich.productCategory,
+      productMaterial: enrich.productMaterial,
+      productRating: enrich.productRating
     }
   };
 }
 
-// =======================================
-// ♻️ ENSURE DATA EXISTS (ALL PAGES)
-// =======================================
-function ensureCaterpillarData(item) {
-  if (!item._caterpillarsigns) {
-    const enriched = normalizeProduct(item);
-    item._caterpillarsigns = enriched._caterpillarsigns;
-  }
-
-  if (!item.productImageUrl) {
-    item.productImageUrl = item.img || "";
-  }
-
-  if (!item.name) {
-    item.name = item.productName || "";
-  }
-
-  return item;
-}
 
 // =======================================
 // ===== KING CODE ORIGINAL FUNCTIONS =====
@@ -278,4 +289,5 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
+
 

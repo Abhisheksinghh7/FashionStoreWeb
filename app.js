@@ -309,37 +309,3 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
-
-/*
-
-var products = _satellite.getVar("productListItems");
-var items = [];
-
-if (!Array.isArray(products)) {
-  return items;
-}
-
-products.forEach(function (item) {
-  var caterpillar = item._caterpillarsigns || {};
-  var itemObj = {
-    SKU: item.SKU || "",
-    name: item.name || "",
-    quantity: Number(item.quantity) || 1,
-    priceTotal: Number(item.priceTotal) || 0
-  };
-
-  // Only add _caterpillarsigns if it has values
-  if (caterpillar.productCategory || caterpillar.productMaterial || caterpillar.productRating) {
-    itemObj._caterpillarsigns = {
-      productCategory: String(caterpillar.productCategory || ""),
-      productMaterial: String(caterpillar.productMaterial || ""),
-      productRating: Number(caterpillar.productRating) || 0
-    };
-  }
-
-  items.push(itemObj);
-});
-
-return items; 
-
-*/

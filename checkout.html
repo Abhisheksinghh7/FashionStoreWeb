@@ -36,30 +36,10 @@
     document.addEventListener('DOMContentLoaded', function () {
       const cart = JSON.parse(localStorage.getItem("cart")) || [];
       if (cart.length > 0 && window.adl && window.adl.trackCheckout) {
-        let total = 0;
-        const products = cart.map(item => {
-          total += item.price * item.qty;
-          return {
-            id: item.id,
-            sku: item.sku || 'SKU-' + item.id,
-            name: item.name,
-            price: item.price,
-            img: item.img,
-            qty: item.qty,
-            color: item.color || '',
-            coupon: item.coupon || '',
-            discount: item.discount || 0,
-            category: item.category || '',
-            productCategory: item.productCategory,
-            productMaterial: item.productMaterial,
-            productRating: item.productRating
-          };
-        });
-
         const checkoutData = {
           totalQuantity: cart.reduce((sum, item) => sum + item.qty, 0),
-          totalValue: total,
-          products: products
+          totalValue: cart.reduce((sum, item) => sum + item.price * item.qty, 0),
+          products: cart
         };
 
         window.adl.trackCheckout(checkoutData);

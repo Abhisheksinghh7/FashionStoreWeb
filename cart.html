@@ -86,17 +86,21 @@
           };
           const logData = cart.map(item => {
             const caterpillar = productCatalog[item.id] || { productCategory: '', productMaterial: '', productRating: 0 };
-            return {
+            const logItem = {
               SKU: item.sku || 'SKU-' + item.id,
               name: item.name,
-              priceTotal: item.price * item.qty,
-              quantity: item.qty,
-              _caterpillarsigns: {
+              priceTotal: Math.round(item.price * item.qty),
+              quantity: Math.round(item.qty)
+            };
+            // Only add _caterpillarsigns if values exist
+            if (caterpillar.productCategory || caterpillar.productMaterial || caterpillar.productRating) {
+              logItem._caterpillarsigns = {
                 productCategory: caterpillar.productCategory,
                 productMaterial: caterpillar.productMaterial,
-                productRating: caterpillar.productRating
-              }
-            };
+                productRating: Math.round(caterpillar.productRating)
+              };
+            }
+            return logItem;
           });
           console.log("📦 Product List Items (Cart Page):", logData);
           console.table(logData);

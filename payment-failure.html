@@ -46,31 +46,19 @@
             productListItems: cart.map((item, index) => {
               const catalogProduct = window.adl?.productCatalog?.[item.id] || {};
               const name = item.name || catalogProduct.name || '';
-              const img = item.img || catalogProduct.img || '';
-              const discount = item.discount !== undefined ? item.discount : (catalogProduct.discount || 0);
-              const coupon = item.coupon || catalogProduct.coupon || '';
-              const category = item.category || catalogProduct.category || '';
-              const color = item.color || catalogProduct.color || '';
-              const discountAmount = discount ? (item.price * discount / 100) : 0;
+              const productRating = catalogProduct.productRating || 0;
+              const productCategory = catalogProduct.productCategory || '';
+              const productMaterial = catalogProduct.productMaterial || '';
               return {
                 SKU: item.sku || 'SKU-' + item.id,
-                currencyCode: "INR",
-                discountAmount: discountAmount,
-                discountPercent: discount,
                 name: name,
-                priceTotal: (item.price || 0) * (item.qty || 1),
-                product: "Default Product",
-                productAddMethod: "cart",
-                productImageUrl: img,
-                quantity: item.qty || 1,
-                refundAmount: 0,
-                unitOfMeasureCode: "EA",
-                _id: item._id || 'prod_' + item.id,
-                color: color,
-                coupon: coupon,
-                category: category,
-                size: item.size || '',
-                brand: "Fashion Store"
+                priceTotal: Math.round((item.price || 0) * (item.qty || 1)),
+                quantity: Math.round(item.qty || 1),
+                _caterpillarsigns: {
+                  productCategory: productCategory,
+                  productMaterial: productMaterial,
+                  productRating: Math.round(productRating)
+                }
               };
             })
           }

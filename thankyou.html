@@ -42,39 +42,13 @@
       let customerName = localStorage.getItem("checkoutCustomerName") || "";
 
       if (cart.length > 0 && window.adl && window.adl.trackPurchase) {
-        let total = 0;
-        const products = cart.map(item => {
-          total += item.price * item.qty;
-          return {
-            id: item.id,
-            sku: item.sku || 'SKU-' + item.id,
-            name: item.name,
-            price: item.price,
-            img: item.img,
-            qty: item.qty,
-            color: item.color || '',
-            coupon: item.coupon || '',
-            discount: item.discount || 0,
-            category: item.category || ''
-          };
-        });
-
         const orderData = {
           orderID: orderId,
           totalQuantity: cart.reduce((sum, item) => sum + item.qty, 0),
-          subtotal: total,
-          shipping: 0,
-          tax: 0,
-          totalValue: total,
-          paymentMethod: 'credit_card',
+          totalValue: cart.reduce((sum, item) => sum + item.price * item.qty, 0),
           customerEmail: orderEmail,
           firstName: customerName,
-          lastName: '',
-          address: '',
-          city: '',
-          state: '',
-          zipCode: '',
-          products: products
+          products: cart
         };
 
         window.adl.trackPurchase(orderData);

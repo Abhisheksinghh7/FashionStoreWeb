@@ -29,13 +29,7 @@
     const discountAmount = pdpItem ? (pdpItem.discount ? (pdpItem.price * pdpItem.discount / 100) : 0) : 0;
     window.adobeDataLayer.push({
       event: "pageLoaded",
-      xdmPageLoad: {
-        custData: {
-          customerID: "",
-          lang: "english",
-          loginStatus: "guest",
-          platform: "desktop website"
-        },
+      xdm: {
         web: {
           webPageDetails: {
             brand: "Fashion Store",
@@ -43,28 +37,23 @@
             pageName: pdpItem ? "product:" + pdpItem.id : "product",
             pageType: "pdp",
             pageUrl: window.location.href
-          },
-          productDetails: pdpItem ? [{
-            productID: pdpItem.id,
-            sku: "SKU-" + pdpItem.id,
-            productName: pdpItem.name,
-            brand: "Fashion Store",
-            category: pdpItem.category || "",
-            price: pdpItem.price,
-            color: pdpItem.color,
-            quantity: 1,
-            currency: "INR",
-            productImageUrl: pdpItem.img,
-            discountAmount: discountAmount,
-            discountPercent: pdpItem.discount || 0,
-            refundAmount: 0,
-            size: pdpItem.size || "",
-            coupon: pdpItem.coupon || "",
-            unitOfMeasureCode: "EA",
-            _id: "prod_" + pdpItem.id
+          }
+        },
+        commerce: {
+          productListItems: pdpItem ? [{
+            SKU: "SKU-" + pdpItem.id,
+            name: pdpItem.name,
+            priceTotal: Math.round(pdpItem.price),
+            quantity: Math.round(1),
+            _caterpillarsigns: {
+              productCategory: pdpItem.productCategory || "",
+              productMaterial: pdpItem.productMaterial || "",
+              productRating: Math.round(pdpItem.productRating || 0)
+            }
           }] : []
         }
-      }
+      },
+      timestamp: new Date().toISOString()
     });
   </script>
 

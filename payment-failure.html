@@ -81,51 +81,52 @@
   </script>
 
   <!-- Adobe Launch -->
- <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js" async></script>
+  <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js"
+    async></script>
 
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header>
-  <h2>Payment Failed</h2>
-</header>
+  <header>
+    <h2>Payment Failed</h2>
+  </header>
 
-<div class="container thankyou-container">
-  <h2>❌ Order Cancelled</h2>
-  <p>Order ID: <strong id="orderId"></strong></p>
+  <div class="container thankyou-container">
+    <h2>❌ Order Cancelled</h2>
+    <p>Order ID: <strong id="orderId"></strong></p>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>ID</th>
-        <th>Qty</th>
-        <th>Amount</th>
-        <th>Color</th>
-        <th>Coupon</th>
-      </tr>
-    </thead>
-    <tbody id="orderRows"></tbody>
-  </table>
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>ID</th>
+          <th>Qty</th>
+          <th>Amount</th>
+          <th>Color</th>
+          <th>Coupon</th>
+        </tr>
+      </thead>
+      <tbody id="orderRows"></tbody>
+    </table>
 
-  <h3 id="grandTotal"></h3>
+    <h3 id="grandTotal"></h3>
 
-  <button onclick="goHome()">Home</button>
-</div>
+    <button onclick="goHome()">Home</button>
+  </div>
 
-<script>
-  document.getElementById("orderId").textContent = orderId || "N/A";
+  <script>
+    document.getElementById("orderId").textContent = orderId || "N/A";
 
-  let total = 0;
-  const rows = document.getElementById("orderRows");
+    let total = 0;
+    const rows = document.getElementById("orderRows");
 
-  cart.forEach(p => {
-    const amt = p.price * p.qty;
-    total += amt;
+    cart.forEach(p => {
+      const amt = p.price * p.qty;
+      total += amt;
 
-    rows.innerHTML += `
+      rows.innerHTML += `
       <tr>
         <td>${p.name}</td>
         <td>${p.id}</td>
@@ -135,19 +136,19 @@
         <td>${p.coupon || ''}</td>
       </tr>
     `;
-  });
+    });
 
-  document.getElementById("grandTotal").textContent =
-    "Total Amount: ₹" + total;
+    document.getElementById("grandTotal").textContent =
+      "Total Amount: ₹" + total;
 
-  function goHome() {
-    localStorage.removeItem("checkoutCart");
-    localStorage.removeItem("checkoutTransactionId");
-    localStorage.removeItem("checkoutFailureReason");
-    location.href = "index.html";
-  }
-</script>
+    function goHome() {
+      localStorage.removeItem("checkoutCart");
+      localStorage.removeItem("checkoutTransactionId");
+      localStorage.removeItem("checkoutFailureReason");
+      location.href = "index.html";
+    }
+  </script>
 
 </body>
-</html>
 
+</html>

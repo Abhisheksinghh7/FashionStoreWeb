@@ -34,60 +34,98 @@
   </script>
 
   <!-- Adobe Launch -->
- <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js" async></script>
+  <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js"
+    async></script>
 
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header>
-  <h2>FashionStore</h2>
-  <nav>
-    <a href="index.html" data-track-link="Home" data-link-type="nav">Home</a>
-    <a href="products.html" data-track-link="Shop" data-link-type="nav">Shop</a>
-  </nav>
-  <div class="mini-cart">🛒 <span id="miniCartCount">0</span></div>
-</header>
+  <header>
+    <h2>FashionStore</h2>
+    <nav>
+      <a href="index.html" data-track-link="Home" data-link-type="nav">Home</a>
+      <a href="products.html" data-track-link="Shop" data-link-type="nav">Shop</a>
+    </nav>
+    <div class="mini-cart">🛒 <span id="miniCartCount">0</span></div>
+  </header>
 
-<div class="container">
-  <h2>Your Cart</h2>
-  <div id="cartItems" class="cart-items"></div>
-  <h3 id="cartTotal"></h3>
-  <button id="clearCartBtn">Clear Cart</button><br><br>
-  <a href="checkout.html" data-track-link="Checkout" data-link-type="cta">
-    <button>Checkout</button>
-  </a>
-</div>
+  <div class="container">
+    <h2>Your Cart</h2>
+    <div id="cartItems" class="cart-items"></div>
+    <h3 id="cartTotal"></h3>
+    <button id="clearCartBtn">Clear Cart</button><br><br>
+    <a href="checkout.html" data-track-link="Checkout" data-link-type="cta">
+      <button>Checkout</button>
+    </a>
+  </div>
 
-<footer>© Made by Abhishek Singh</footer>
+  <footer>© Made by Abhishek Singh</footer>
 
-<script src="app.js"></script>
-<script src="adl-utils.js"></script>
-<script src="adl-events.js"></script>
-<script src="adl-auto-track.js"></script>
+  <script src="app.js"></script>
+  <script src="adl-utils.js"></script>
+  <script src="adl-events.js"></script>
+  <script src="adl-auto-track.js"></script>
 
-<script>
-  let cart = getCart();
-  const items = document.getElementById("cartItems");
-  const totalEl = document.getElementById("cartTotal");
-  let cartViewPushed = false;
+  <script>
+    // Console logging only - for verification
+    document.addEventListener('DOMContentLoaded', function () {
+      setTimeout(function () {
+        const cart = getCart();
+        if (cart.length > 0) {
+          const productCatalog = {
+            1: { productCategory: "fashion", productMaterial: "cotton", productRating: 4.5 },
+            2: { productCategory: "fashion", productMaterial: "denim", productRating: 4.3 },
+            3: { productCategory: "fashion", productMaterial: "polyester", productRating: 4.7 },
+            4: { productCategory: "footwear", productMaterial: "leather", productRating: 4.4 },
+            5: { productCategory: "fashion", productMaterial: "cotton", productRating: 4.2 },
+            6: { productCategory: "electronics", productMaterial: "plastic", productRating: 4.8 },
+            7: { productCategory: "electronics", productMaterial: "plastic", productRating: 4.6 },
+            8: { productCategory: "electronics", productMaterial: "metal", productRating: 4.5 }
+          };
+          const logData = cart.map(item => {
+            const caterpillar = productCatalog[item.id] || { productCategory: '', productMaterial: '', productRating: 0 };
+            return {
+              SKU: item.sku || 'SKU-' + item.id,
+              name: item.name,
+              priceTotal: item.price * item.qty,
+              quantity: item.qty,
+              _caterpillarsigns: {
+                productCategory: caterpillar.productCategory,
+                productMaterial: caterpillar.productMaterial,
+                productRating: caterpillar.productRating
+              }
+            };
+          });
+          console.log("📦 Product List Items (Cart Page):", logData);
+          console.table(logData);
+        }
+      }, 500);
+    });
+  </script>
 
-  function renderCart() {
-    items.innerHTML = "";
-    let total = 0;
+  <script>
+    let cart = getCart();
+    const items = document.getElementById("cartItems");
+    const totalEl = document.getElementById("cartTotal");
+    let cartViewPushed = false;
 
-    if (cart.length === 0) {
-      items.innerHTML = "<p>Cart is empty</p>";
-      totalEl.textContent = "";
-      updateMiniCart();
-      return;
-    }
+    function renderCart() {
+      items.innerHTML = "";
+      let total = 0;
 
-    cart.forEach(i => {
-      const t = i.price * i.qty;
-      total += t;
-      items.innerHTML += `
+      if (cart.length === 0) {
+        items.innerHTML = "<p>Cart is empty</p>";
+        totalEl.textContent = "";
+        updateMiniCart();
+        return;
+      }
+
+      cart.forEach(i => {
+        const t = i.price * i.qty;
+        total += t;
+        items.innerHTML += `
         <div class="cart-item">
           <img src="${i.img}">
           <strong>${i.name}</strong>
@@ -100,19 +138,58 @@
           <button data-track-link="Remove" data-link-type="removeFromCart" onclick="removeItem(${i.id})">Remove</button>
         </div>
       `;
-    });
+      });
 
-    totalEl.textContent = "Total: ₹" + total;
-    updateMiniCart();
+      totalEl.textContent = "Total: ₹" + total;
+      updateMiniCart();
 
-    /* ==============================
-       ✅ SHOPPING CART VIEW EVENT (scView)
-       ============================== */
-    if (!cartViewPushed && cart.length > 0) {
-      const cartData = {
-        totalQuantity: cart.reduce((sum, item) => sum + item.qty, 0),
-        totalValue: total,
-        products: cart.map(item => ({
+      /* ==============================
+         ✅ SHOPPING CART VIEW EVENT (scView)
+         ============================== */
+      if (!cartViewPushed && cart.length > 0) {
+        const cartData = {
+          totalQuantity: cart.reduce((sum, item) => sum + item.qty, 0),
+          totalValue: total,
+          products: cart.map(item => ({
+            id: item.id,
+            sku: item.sku || 'SKU-' + item.id,
+            name: item.name,
+            price: item.price,
+            img: item.img,
+            qty: item.qty,
+            color: item.color || '',
+            coupon: item.coupon || '',
+            discount: item.discount || 0,
+            category: item.category || '',
+            productCategory: item.productCategory,
+            productMaterial: item.productMaterial,
+            productRating: item.productRating
+          }))
+        };
+
+        if (window.adl && window.adl.trackShoppingCartView) {
+          window.adl.trackShoppingCartView(cartData, 'cart');
+          cartViewPushed = true;
+        }
+      }
+    }
+
+    function qty(id, d) {
+      const i = cart.find(x => x.id === id);
+      i.qty = Math.max(1, i.qty + d);
+      saveCart(cart);
+      cartViewPushed = false;
+      renderCart();
+    }
+
+    function removeItem(id) {
+      const item = cart.find(x => x.id === id);
+      if (item) {
+        // Fire linkClicked with removeFromCart
+        window.adl.trackLinkClick('remove ' + item.name, 'removeFromCart', 'cart-table', 'cart');
+
+        // Fire removeFromCart event
+        window.adl.trackRemoveFromCart({
           sku: 'SKU-' + item.id,
           productID: item.id,
           productName: item.name,
@@ -121,63 +198,27 @@
           price: item.price,
           color: item.color || '',
           size: '',
-          quantity: item.qty,
-          currencyCode: "INR"
-        }))
-      };
-      
-      if (window.adl && window.adl.trackShoppingCartView) {
-        window.adl.trackShoppingCartView(cartData, 'cart');
-        cartViewPushed = true;
+          quantity: item.qty
+        });
+
+        // Remove from cart
+        cart = cart.filter(x => x.id !== id);
+        saveCart(cart);
+        cartViewPushed = false;
+        renderCart();
       }
     }
-  }
 
-  function qty(id, d) {
-    const i = cart.find(x => x.id === id);
-    i.qty = Math.max(1, i.qty + d);
-    saveCart(cart);
-    cartViewPushed = false;
-    renderCart();
-  }
-
-  function removeItem(id) {
-    const item = cart.find(x => x.id === id);
-    if (item) {
-      // Fire linkClicked with removeFromCart
-      window.adl.trackLinkClick('remove ' + item.name, 'removeFromCart', 'cart-table', 'cart');
-      
-      // Fire removeFromCart event
-      window.adl.trackRemoveFromCart({
-        sku: 'SKU-' + item.id,
-        productID: item.id,
-        productName: item.name,
-        brand: 'Fashion Store',
-        category: '',
-        price: item.price,
-        color: item.color || '',
-        size: '',
-        quantity: item.qty
-      });
-      
-      // Remove from cart
-      cart = cart.filter(x => x.id !== id);
+    document.getElementById("clearCartBtn").onclick = () => {
+      cart = [];
       saveCart(cart);
       cartViewPushed = false;
       renderCart();
-    }
-  }
+    };
 
-  document.getElementById("clearCartBtn").onclick = () => {
-    cart = [];
-    saveCart(cart);
-    cartViewPushed = false;
     renderCart();
-  };
-
-  renderCart();
-</script>
+  </script>
 
 </body>
-</html>
 
+</html>

@@ -33,14 +33,14 @@
     });
 
     // ✅ PURCHASE EVENT (scPurchase) - Complete order details with all product/revenue info
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
       const orderId = localStorage.getItem("checkoutTransactionId") || "ORD-" + Date.now();
-      
+
       // Get email from checkout form (stored in localStorage)
       let orderEmail = localStorage.getItem("checkoutCustomerEmail") || "";
       let customerName = localStorage.getItem("checkoutCustomerName") || "";
-      
+
       if (cart.length > 0 && window.adl && window.adl.trackPurchase) {
         let total = 0;
         const products = cart.map(item => {
@@ -58,7 +58,7 @@
             category: item.category || ''
           };
         });
-        
+
         const orderData = {
           orderID: orderId,
           totalQuantity: cart.reduce((sum, item) => sum + item.qty, 0),
@@ -76,62 +76,100 @@
           zipCode: '',
           products: products
         };
-        
+
         window.adl.trackPurchase(orderData);
       }
     });
   </script>
 
- <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js" async></script>
+  <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js"
+    async></script>
 
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header>
-  <h2>Order Confirmed</h2>
-</header>
+  <header>
+    <h2>Order Confirmed</h2>
+  </header>
 
-<div class="container thankyou-container">
-  <h2>🎉 Thank You for Your Order</h2>
-  <p>Order ID: <strong id="orderId"></strong></p>
+  <div class="container thankyou-container">
+    <h2>🎉 Thank You for Your Order</h2>
+    <p>Order ID: <strong id="orderId"></strong></p>
 
-  <table width="100%" border="1" cellspacing="0" cellpadding="8">
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>ID</th>
-        <th>Qty</th>
-        <th>Amount</th>
-        <th>Color</th>
-        <th>Coupon</th>
-      </tr>
-    </thead>
-    <tbody id="orderRows"></tbody>
-  </table>
+    <table width="100%" border="1" cellspacing="0" cellpadding="8">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>ID</th>
+          <th>Qty</th>
+          <th>Amount</th>
+          <th>Color</th>
+          <th>Coupon</th>
+        </tr>
+      </thead>
+      <tbody id="orderRows"></tbody>
+    </table>
 
-  <h3 id="grandTotal"></h3>
-  <button onclick="finishOrder()">Go to Home</button>
-</div>
+    <h3 id="grandTotal"></h3>
+    <button onclick="finishOrder()">Go to Home</button>
+  </div>
 
-<script src="app.js"></script>
-<script src="adl-utils.js"></script>
-<script src="adl-events.js"></script>
-<script src="adl-auto-track.js"></script>
+  <script src="app.js"></script>
+  <script src="adl-utils.js"></script>
+  <script src="adl-events.js"></script>
+  <script src="adl-auto-track.js"></script>
 
-<script>
-  // Generate random unique email
-  const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
-  const orderId = localStorage.getItem("checkoutTransactionId");
-  let total = 0;
+  <script>
+    // Console logging only - for verification
+    document.addEventListener('DOMContentLoaded', function () {
+      setTimeout(function () {
+        const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
+        if (cart.length > 0) {
+          const productCatalog = {
+            1: { productCategory: "fashion", productMaterial: "cotton", productRating: 4.5 },
+            2: { productCategory: "fashion", productMaterial: "denim", productRating: 4.3 },
+            3: { productCategory: "fashion", productMaterial: "polyester", productRating: 4.7 },
+            4: { productCategory: "footwear", productMaterial: "leather", productRating: 4.4 },
+            5: { productCategory: "fashion", productMaterial: "cotton", productRating: 4.2 },
+            6: { productCategory: "electronics", productMaterial: "plastic", productRating: 4.8 },
+            7: { productCategory: "electronics", productMaterial: "plastic", productRating: 4.6 },
+            8: { productCategory: "electronics", productMaterial: "metal", productRating: 4.5 }
+          };
+          const logData = cart.map(item => {
+            const caterpillar = productCatalog[item.id] || { productCategory: '', productMaterial: '', productRating: 0 };
+            return {
+              SKU: item.sku || 'SKU-' + item.id,
+              name: item.name,
+              priceTotal: item.price * item.qty,
+              quantity: item.qty,
+              _caterpillarsigns: {
+                productCategory: caterpillar.productCategory,
+                productMaterial: caterpillar.productMaterial,
+                productRating: caterpillar.productRating
+              }
+            };
+          });
+          console.log("📦 Product List Items (Thank You Page):", logData);
+          console.table(logData);
+        }
+      }, 500);
+    });
+  </script>
 
-  document.getElementById("orderId").textContent = orderId || "N/A"
-  cart.forEach(p => {
-    const amt = p.price * p.qty;
-    total += amt;
+  <script>
+    // Generate random unique email
+    const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
+    const orderId = localStorage.getItem("checkoutTransactionId");
+    let total = 0;
 
-    orderRows.innerHTML += `
+    document.getElementById("orderId").textContent = orderId || "N/A"
+    cart.forEach(p => {
+      const amt = p.price * p.qty;
+      total += amt;
+
+      orderRows.innerHTML += `
       <tr>
         <td>${p.name}</td>
         <td>${p.id}</td>
@@ -141,15 +179,16 @@
         <td>${p.coupon || ''}</td>
       </tr>
     `;
-  });
+    });
 
-  grandTotal.textContent = "Total Paid: ₹" + total;
+    grandTotal.textContent = "Total Paid: ₹" + total;
 
-  function finishOrder() {
-    localStorage.clear();
-    location.href = "index.html";
-  }
-</script>
+    function finishOrder() {
+      localStorage.clear();
+      location.href = "index.html";
+    }
+  </script>
 
 </body>
+
 </html>

@@ -24,7 +24,7 @@
       8: { id: 8, name: "Smartwatch", price: 9999, discount: 0, color: "Black", img: "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=800", category: "Electronics", size: "", coupon: "" }
     };
     const pdpItem = pdpProducts[pdpId];
-    
+
     // PDP pageLoaded (ONLY page that includes productDetails)
     const discountAmount = pdpItem ? (pdpItem.discount ? (pdpItem.price * pdpItem.discount / 100) : 0) : 0;
     window.adobeDataLayer.push({
@@ -69,50 +69,52 @@
   </script>
 
   <!-- Adobe Launch -->
-<script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js" async></script>
+  <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js"
+    async></script>
 
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header>
-  <h2>FashionStore</h2>
-  <nav>
-    <a href="index.html" data-track-link="Home" data-link-type="nav">Home</a>
-    <a href="products.html" data-track-link="Products" data-link-type="nav">Products</a>
-    <a href="cart.html" data-track-link="Cart" data-link-type="nav">Cart</a>
-  </nav>
-  <div class="mini-cart" onclick="goToCart()">🛒 <span id="miniCartCount">0</span></div>
-</header>
+  <header>
+    <h2>FashionStore</h2>
+    <nav>
+      <a href="index.html" data-track-link="Home" data-link-type="nav">Home</a>
+      <a href="products.html" data-track-link="Products" data-link-type="nav">Products</a>
+      <a href="cart.html" data-track-link="Cart" data-link-type="nav">Cart</a>
+    </nav>
+    <div class="mini-cart" onclick="goToCart()">🛒 <span id="miniCartCount">0</span></div>
+  </header>
 
-<div class="container product-detail" id="productDetail"></div>
+  <div class="container product-detail" id="productDetail"></div>
 
-<footer>© Made by Abhishek Singh</footer>
+  <footer>© Made by Abhishek Singh</footer>
 
-<script src="app.js"></script>
-<script src="adl-utils.js"></script>
-<script src="adl-events.js"></script>
-<script src="adl-auto-track.js"></script>
+  <script src="app.js"></script>
+  <script src="adl-utils.js"></script>
+  <script src="adl-events.js"></script>
+  <script src="adl-auto-track.js"></script>
 
-<script>
-  const products = {
-    1: { id: 1, name: "T-Shirt", price: 799, discount: 10, coupon: "TSHIRT10", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800", color: "Red" },
-    2: { id: 2, name: "Jeans", price: 1999, discount: 5, coupon: "JEANS5", img: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", color: "Blue" },
-    3: { id: 3, name: "Jacket", price: 3499, discount: 15, coupon: "JACKET15", img: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", color: "Black" },
-    4: { id: 4, name: "Shoes", price: 2499, discount: 20, coupon: "SHOES20", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800", color: "White" },
-    5: { id: 5, name: "Shirt", price: 1499, discount: 0, coupon: "", img: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=800", color: "Grey" },
-    6: { id: 6, name: "Camera", price: 45999, discount: 5, coupon: "CAMERA5", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=800", color: "Black" },
-    7: { id: 7, name: "Headphone", price: 2999, discount: 10, coupon: "HEAD10", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800", color: "Blue" },
-    8: { id: 8, name: "Smartwatch", price: 9999, discount: 0, coupon: "", img: "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=800", color: "Black" }
-  };
+  <script>
+    const products = {
+      1: { id: 1, name: "T-Shirt", price: 799, discount: 10, coupon: "TSHIRT10", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800", color: "Red" },
+      2: { id: 2, name: "Jeans", price: 1999, discount: 5, coupon: "JEANS5", img: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", color: "Blue" },
+      3: { id: 3, name: "Jacket", price: 3499, discount: 15, coupon: "JACKET15", img: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", color: "Black" },
+      4: { id: 4, name: "Shoes", price: 2499, discount: 20, coupon: "SHOES20", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800", color: "White" },
+      5: { id: 5, name: "Shirt", price: 1499, discount: 0, coupon: "", img: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=800", color: "Grey" },
+      6: { id: 6, name: "Camera", price: 45999, discount: 5, coupon: "CAMERA5", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=800", color: "Black" },
+      7: { id: 7, name: "Headphone", price: 2999, discount: 10, coupon: "HEAD10", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800", color: "Blue" },
+      8: { id: 8, name: "Smartwatch", price: 9999, discount: 0, coupon: "", img: "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=800", color: "Black" }
+    };
 
-  const id = new URLSearchParams(location.search).get("id");
-  const p = products[id];
-  const c = document.getElementById("productDetail");
+    const id = new URLSearchParams(location.search).get("id");
+    const p = products[id];
+    const c = document.getElementById("productDetail");
 
-  if (p) {
-    c.innerHTML = `
+    if (p) {
+      console.log("Product loaded:", p);
+      c.innerHTML = `
       <img src="${p.img}" width="320">
       <h2>${p.name}</h2>
       <p>
@@ -121,15 +123,38 @@
       </p>
       <p>Color: ${p.color}</p>
       ${p.coupon ? `<p>Coupon: ${p.coupon}</p>` : ""}
-      <button onclick='addToCart(${JSON.stringify(p)})'>Add to Cart</button>
+      <button class="add-to-cart-btn" data-product-id="${p.id}" data-product-name="${p.name}" data-product-price="${p.price}" data-product-img="${p.img}" data-product-discount="${p.discount}" data-product-coupon="${p.coupon}" data-product-color="${p.color}">Add to Cart</button>
     `;
-  } else {
-    c.innerHTML = "<p>Product not found</p>";
-  }
+      console.log("Button HTML created with data attributes");
+    } else {
+      c.innerHTML = "<p>Product not found</p>";
+    }
 
-  updateMiniCart();
-</script>
+    // Event delegation for Add to Cart button using DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', function () {
+      setTimeout(function () {
+        document.body.addEventListener('click', function (e) {
+          if (e.target.classList.contains('add-to-cart-btn')) {
+            const btn = e.target;
+            const productData = {
+              id: parseInt(btn.getAttribute('data-product-id')),
+              name: btn.getAttribute('data-product-name'),
+              price: parseInt(btn.getAttribute('data-product-price')),
+              img: btn.getAttribute('data-product-img'),
+              discount: parseInt(btn.getAttribute('data-product-discount')),
+              coupon: btn.getAttribute('data-product-coupon'),
+              color: btn.getAttribute('data-product-color')
+            };
+            console.log("Button clicked! Product data:", productData);
+            addToCart(productData);
+          }
+        });
+      }, 100);
+    });
+
+    updateMiniCart();
+  </script>
 
 </body>
-</html>
 
+</html>

@@ -309,39 +309,3 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
-/*
-
-var products = _satellite.getVar("productListItems");
-var items = [];
-if (!Array.isArray(products)) { return items; }
-products.forEach(function (item) {
-  var caterpillar = item._caterpillarsigns || {};
-  items.push({
-    _id: item._id || item.SKU || "",
-    SKU: item.SKU || "",
-    name: item.name || "",
-    product: item.product || "",
-    quantity: Number(item.quantity) || 1,
-    currencyCode: item.currencyCode || "INR",
-    priceTotal: Number(item.priceTotal) || 0,
-    discountAmount: Number(item.discountAmount) || 0,
-    productAddMethod: item.productAddMethod || "",
-    productImageUrl: item.productImageUrl || "",
-    unitOfMeasureCode: "EA",
-    color: item.color || "",
-    coupon: item.coupon || "",
-    brand: item.brand || "",
-    productCategories: item.category ? [item.category] : [],
-    selectedOptions: [],
-    returnItem: { refundAmount: 0 },
-    _caterpillarsigns: {
-      productCategory: String(caterpillar.productCategory || ""),
-      productMaterial: String(caterpillar.productMaterial || ""),
-      productRating: Number(caterpillar.productRating) || 0
-    },
-    _experience: { standard: {} }
-  });
-});
-return items;
-
-*/

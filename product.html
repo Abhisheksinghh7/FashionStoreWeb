@@ -44,12 +44,7 @@
             SKU: "SKU-" + pdpItem.id,
             name: pdpItem.name,
             priceTotal: Math.round(pdpItem.price),
-            quantity: Math.round(1),
-            _caterpillarsigns: {
-              productCategory: pdpItem.productCategory || "",
-              productMaterial: pdpItem.productMaterial || "",
-              productRating: Math.round(pdpItem.productRating || 0)
-            }
+            quantity: Math.round(1)
           }] : []
         }
       },

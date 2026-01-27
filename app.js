@@ -306,6 +306,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
   });
 
-
 });
-

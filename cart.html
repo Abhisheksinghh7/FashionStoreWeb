@@ -151,30 +151,40 @@
          ✅ SHOPPING CART VIEW EVENT (scView)
          ============================== */
       if (!cartViewPushed && cart.length > 0) {
-        const cartData = {
-          totalQuantity: cart.reduce((sum, item) => sum + item.qty, 0),
-          totalValue: total,
-          products: cart.map(item => ({
-            id: item.id,
-            sku: item.sku || 'SKU-' + item.id,
-            name: item.name,
-            price: item.price,
-            img: item.img,
-            qty: item.qty,
-            color: item.color || '',
-            coupon: item.coupon || '',
-            discount: item.discount || 0,
-            category: item.category || '',
-            productCategory: item.productCategory,
-            productMaterial: item.productMaterial,
-            productRating: item.productRating
-          }))
-        };
+        // Build productListItems array
+        const productListItems = cart.map(item => {
+          const complete = window.adl.getCompleteProductData(item);
+          const itemObj = {
+            SKU: complete.sku,
+            name: complete.name,
+            priceTotal: Math.round(complete.price * complete.qty),
+            quantity: Math.round(complete.qty)
+          };
+          // Only add _caterpillarsigns if it has values
+          if (complete.productCategory || complete.productMaterial || complete.productRating) {
+            itemObj._caterpillarsigns = {
+              productCategory: complete.productCategory,
+              productMaterial: complete.productMaterial,
+              productRating: Math.round(complete.productRating)
+            };
+          }
+          return itemObj;
+        });
 
-        if (window.adl && window.adl.trackShoppingCartView) {
-          window.adl.trackShoppingCartView(cartData, 'cart');
-          cartViewPushed = true;
-        }
+        // Push event directly to adobeDataLayer
+        window.adobeDataLayer = window.adobeDataLayer || [];
+        window.adobeDataLayer.push({
+          event: "scView",
+          timestamp: new Date().toISOString(),
+          xdm: {
+            eventType: "commerce.productListViews",
+            commerce: {
+              productListItems: productListItems
+            }
+          }
+        });
+
+        cartViewPushed = true;
       }
     }
 

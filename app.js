@@ -306,4 +306,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
   });
 
+
 });
+
+
+/*
+
+var products = _satellite.getVar("productListItems");
+var items = [];
+
+if (!Array.isArray(products)) {
+  return items;
+}
+
+products.forEach(function (item) {
+  var caterpillar = item.caterpillarsigns || {};
+  var itemObj = {
+    SKU: item.SKU || "",
+    name: item.name || "",
+    quantity: Number(item.quantity) || 1,
+    priceTotal: Number(item.priceTotal) || 0
+  };
+
+  // Add caterpillarsigns with all available properties
+  if (caterpillar && Object.keys(caterpillar).length > 0) {
+    itemObj.caterpillarsigns = {
+      productCategory: String(caterpillar.productCategory || ""),
+      productMaterial: String(caterpillar.productMaterial || ""),
+      productRating: Number(caterpillar.productRating) || 0
+    };
+  }
+
+  items.push(itemObj);
+});
+
+return items;
+
+*/

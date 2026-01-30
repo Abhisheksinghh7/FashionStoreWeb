@@ -5,27 +5,18 @@
   <meta charset="UTF-8">
   <title>Thank You</title>
 
-  <!-- ===============================
-       ADL UTILITIES (UNCHANGED)
-       =============================== -->
+  <!-- ✅ LOAD ADL UTILITIES FIRST -->
   <script src="adl-utils.js"></script>
   <script src="adl-events.js"></script>
 
-  <!-- ===============================
-       ADOBE DATA LAYER INIT
-       =============================== -->
   <script>
     window.adobeDataLayer = window.adobeDataLayer || [];
   </script>
 
-  <!-- ===============================
-       ADOBE LAUNCH (UNCHANGED)
-       =============================== -->
+  <!-- ✅ ADOBE LAUNCH LIBRARY (Must load before purchase event) -->
   <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js"></script>
 
-  <!-- ===============================
-       PAGE LOAD EVENT (UNCHANGED)
-       =============================== -->
+  <!-- ✅ XDM PAGE LOAD -->
   <script>
     window.adobeDataLayer.push({
       event: "pageLoaded",
@@ -49,71 +40,99 @@
     });
   </script>
 
-  <!-- ===============================
-       PURCHASE EVENT (FIXED)
-       =============================== -->
+  <!-- ✅ PURCHASE EVENT - Wait for Adobe Launch to be ready -->
   <script>
     function firePurchaseEvent() {
-
       const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
-      const orderId = localStorage.getItem("checkoutTransactionId") || ("ORD-" + Date.now());
+      const orderId = localStorage.getItem("checkoutTransactionId") || "ORD-" + Date.now();
       const orderEmail = localStorage.getItem("checkoutCustomerEmail") || "";
       const customerName = localStorage.getItem("checkoutCustomerName") || "";
 
-      if (!cart.length) {
-        console.warn("❌ Purchase not fired: cart is empty");
-        return;
+      console.log("📦 Raw cart from localStorage:", JSON.stringify(cart, null, 2));
+
+      if (cart.length > 0 && window.adl && window.adl.trackPurchase) {
+
+        // ✅ Build productListItems with ALL correct data
+        const productListItems = cart.map(item => {
+          console.log("🔍 Processing item:", item);
+
+          // Get proper values from cart item
+          const sku = String(item.id); // Use ID as SKU (e.g., "1" for T-Shirt)
+          const price = Number(item.price) || 0;
+          const qty = Number(item.qty) || 1;
+          const totalPrice = price * qty;
+
+          const listItem = {
+            SKU: sku,
+            name: item.name || "",
+            quantity: qty,
+            priceTotal: totalPrice
+          };
+
+          console.log("✅ Base item:", listItem);
+
+          // ✅ ADD CUSTOM ATTRIBUTES IN XDM NAMESPACE
+          const productCategory = item.productCategory || "";
+          const productMaterial = item.productMaterial || "";
+          const productRating = Math.round(Number(item.productRating)) || 0;
+
+          console.log("🎯 Custom attributes from cart:", { productCategory, productMaterial, productRating });
+
+          if (productCategory || productMaterial || productRating) {
+            listItem._digiwebanaoptznapactrsd = {
+              caterpillarsigns: {
+                productCategory: String(productCategory),
+                productMaterial: String(productMaterial),
+                productRating: Number(productRating)
+              }
+            };
+            console.log("✅ With caterpillarsigns:", listItem);
+          }
+
+          return listItem;
+        });
+
+        console.log("📦 FINAL productListItems to send:", JSON.stringify(productListItems, null, 2));
+
+        window.adl.trackPurchase({
+          orderID: orderId,
+          totalQuantity: cart.reduce((s, i) => s + i.qty, 0),
+          totalValue: cart.reduce((s, i) => s + i.price * i.qty, 0),
+          customerEmail: orderEmail,
+          firstName: customerName,
+          productListItems: productListItems
+        });
+      } else {
+        console.warn("❌ Cannot fire purchase event. Cart empty or ADL not ready:", {
+          cartLength: cart?.length,
+          adlExists: !!window.adl,
+          trackPurchaseExists: !!window.adl?.trackPurchase
+        });
       }
-
-      if (!window.adl || !window.adl.trackPurchase) {
-        console.warn("❌ Purchase not fired: ADL not ready");
-        return;
-      }
-
-      /* =====================================================
-         ✅ CRITICAL FIX
-         Pull enriched productListItems from Adobe Launch
-         (Includes caterpillarsigns correctly)
-         ===================================================== */
-      const productListItems =
-        _satellite.getVar("Custom Code productListItems") || [];
-
-      console.log("✅ Final productListItems from Launch:", productListItems);
-
-      window.adl.trackPurchase({
-        orderID: orderId,
-        totalQuantity: cart.reduce((s, i) => s + (i.qty || 1), 0),
-        totalValue: cart.reduce((s, i) => s + (i.price * i.qty), 0),
-        customerEmail: orderEmail,
-        firstName: customerName,
-        productListItems: productListItems
-      });
     }
 
-    /* =====================================================
-       WAIT FOR ADOBE LAUNCH TO BE READY
-       ===================================================== */
-    document.addEventListener("DOMContentLoaded", function () {
-
+    // ✅ WAIT FOR ADOBE LAUNCH TO LOAD, THEN FIRE PURCHASE EVENT
+    document.addEventListener('DOMContentLoaded', function () {
+      // Try immediately first
       if (window.adl && window.adl.trackPurchase) {
         firePurchaseEvent();
-        return;
+      } else {
+        // If not ready, wait and retry
+        let attempts = 0;
+        const checkInterval = setInterval(() => {
+          attempts++;
+          console.log(`🔍 Waiting for Adobe Launch (attempt ${attempts})...`);
+
+          if (window.adl && window.adl.trackPurchase) {
+            clearInterval(checkInterval);
+            console.log("✅ Adobe Launch ready! Firing purchase event...");
+            firePurchaseEvent();
+          } else if (attempts > 50) {
+            clearInterval(checkInterval);
+            console.error("❌ Adobe Launch did not load after 5 seconds");
+          }
+        }, 100);
       }
-
-      let attempts = 0;
-      const interval = setInterval(function () {
-        attempts++;
-
-        if (window.adl && window.adl.trackPurchase) {
-          clearInterval(interval);
-          firePurchaseEvent();
-        }
-
-        if (attempts > 50) {
-          clearInterval(interval);
-          console.error("❌ Adobe Launch did not load in time");
-        }
-      }, 100);
     });
   </script>
 
@@ -146,9 +165,6 @@
     <button onclick="finishOrder()">Go to Home</button>
   </div>
 
-  <!-- ===============================
-       UI RENDER (UNCHANGED)
-       =============================== -->
   <script>
     const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
     const orderId = localStorage.getItem("checkoutTransactionId");
@@ -160,7 +176,7 @@
       const amt = p.price * p.qty;
       total += amt;
 
-      document.getElementById("orderRows").innerHTML += `
+      orderRows.innerHTML += `
         <tr>
           <td>${p.name}</td>
           <td>${p.id}</td>
@@ -170,8 +186,7 @@
       `;
     });
 
-    document.getElementById("grandTotal").textContent =
-      "Total Paid: ₹" + total;
+    grandTotal.textContent = "Total Paid: ₹" + total;
 
     function finishOrder() {
       localStorage.clear();
@@ -180,4 +195,5 @@
   </script>
 
 </body>
+
 </html>

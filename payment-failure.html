@@ -46,31 +46,19 @@
             productListItems: cart.map((item, index) => {
               const catalogProduct = window.adl?.productCatalog?.[item.id] || {};
               const name = item.name || catalogProduct.name || '';
-              const img = item.img || catalogProduct.img || '';
-              const discount = item.discount !== undefined ? item.discount : (catalogProduct.discount || 0);
-              const coupon = item.coupon || catalogProduct.coupon || '';
-              const category = item.category || catalogProduct.category || '';
-              const color = item.color || catalogProduct.color || '';
-              const discountAmount = discount ? (item.price * discount / 100) : 0;
+              const productRating = catalogProduct.productRating || 0;
+              const productCategory = catalogProduct.productCategory || '';
+              const productMaterial = catalogProduct.productMaterial || '';
               return {
                 SKU: item.sku || 'SKU-' + item.id,
-                currencyCode: "INR",
-                discountAmount: discountAmount,
-                discountPercent: discount,
                 name: name,
-                priceTotal: (item.price || 0) * (item.qty || 1),
-                product: "Default Product",
-                productAddMethod: "cart",
-                productImageUrl: img,
-                quantity: item.qty || 1,
-                refundAmount: 0,
-                unitOfMeasureCode: "EA",
-                _id: item._id || 'prod_' + item.id,
-                color: color,
-                coupon: coupon,
-                category: category,
-                size: item.size || '',
-                brand: "Fashion Store"
+                priceTotal: Math.round((item.price || 0) * (item.qty || 1)),
+                quantity: Math.round(item.qty || 1),
+                _caterpillarsigns: {
+                  productCategory: productCategory,
+                  productMaterial: productMaterial,
+                  productRating: Math.round(productRating)
+                }
               };
             })
           }
@@ -81,51 +69,52 @@
   </script>
 
   <!-- Adobe Launch -->
-  <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js" async></script>
+  <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js"
+    async></script>
 
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header>
-  <h2>Payment Failed</h2>
-</header>
+  <header>
+    <h2>Payment Failed</h2>
+  </header>
 
-<div class="container thankyou-container">
-  <h2>❌ Order Cancelled</h2>
-  <p>Order ID: <strong id="orderId"></strong></p>
+  <div class="container thankyou-container">
+    <h2>❌ Order Cancelled</h2>
+    <p>Order ID: <strong id="orderId"></strong></p>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>ID</th>
-        <th>Qty</th>
-        <th>Amount</th>
-        <th>Color</th>
-        <th>Coupon</th>
-      </tr>
-    </thead>
-    <tbody id="orderRows"></tbody>
-  </table>
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>ID</th>
+          <th>Qty</th>
+          <th>Amount</th>
+          <th>Color</th>
+          <th>Coupon</th>
+        </tr>
+      </thead>
+      <tbody id="orderRows"></tbody>
+    </table>
 
-  <h3 id="grandTotal"></h3>
+    <h3 id="grandTotal"></h3>
 
-  <button onclick="goHome()">Home</button>
-</div>
+    <button onclick="goHome()">Home</button>
+  </div>
 
-<script>
-  document.getElementById("orderId").textContent = orderId || "N/A";
+  <script>
+    document.getElementById("orderId").textContent = orderId || "N/A";
 
-  let total = 0;
-  const rows = document.getElementById("orderRows");
+    let total = 0;
+    const rows = document.getElementById("orderRows");
 
-  cart.forEach(p => {
-    const amt = p.price * p.qty;
-    total += amt;
+    cart.forEach(p => {
+      const amt = p.price * p.qty;
+      total += amt;
 
-    rows.innerHTML += `
+      rows.innerHTML += `
       <tr>
         <td>${p.name}</td>
         <td>${p.id}</td>
@@ -135,18 +124,19 @@
         <td>${p.coupon || ''}</td>
       </tr>
     `;
-  });
+    });
 
-  document.getElementById("grandTotal").textContent =
-    "Total Amount: ₹" + total;
+    document.getElementById("grandTotal").textContent =
+      "Total Amount: ₹" + total;
 
-  function goHome() {
-    localStorage.removeItem("checkoutCart");
-    localStorage.removeItem("checkoutTransactionId");
-    localStorage.removeItem("checkoutFailureReason");
-    location.href = "index.html";
-  }
-</script>
+    function goHome() {
+      localStorage.removeItem("checkoutCart");
+      localStorage.removeItem("checkoutTransactionId");
+      localStorage.removeItem("checkoutFailureReason");
+      location.href = "index.html";
+    }
+  </script>
 
 </body>
+
 </html>

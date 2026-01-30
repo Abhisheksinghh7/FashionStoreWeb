@@ -5,9 +5,16 @@
   <meta charset="UTF-8">
   <title>Thank You</title>
 
+  <!-- ✅ LOAD ADL UTILITIES FIRST -->
+  <script src="adl-utils.js"></script>
+  <script src="adl-events.js"></script>
+
   <script>
     window.adobeDataLayer = window.adobeDataLayer || [];
   </script>
+
+  <!-- ✅ ADOBE LAUNCH LIBRARY (Must load before purchase event) -->
+  <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js"></script>
 
   <!-- ✅ XDM PAGE LOAD -->
   <script>
@@ -33,12 +40,11 @@
     });
   </script>
 
-  <!-- ✅ PURCHASE EVENT -->
+  <!-- ✅ PURCHASE EVENT - Wait for Adobe Launch to be ready -->
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    function firePurchaseEvent() {
       const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
       const orderId = localStorage.getItem("checkoutTransactionId") || "ORD-" + Date.now();
-
       const orderEmail = localStorage.getItem("checkoutCustomerEmail") || "";
       const customerName = localStorage.getItem("checkoutCustomerName") || "";
 
@@ -80,6 +86,8 @@
           return listItem;
         });
 
+        console.log("📦 Firing purchase event with productListItems:", productListItems);
+
         window.adl.trackPurchase({
           orderID: orderId,
           totalQuantity: cart.reduce((s, i) => s + i.qty, 0),
@@ -88,12 +96,39 @@
           firstName: customerName,
           productListItems: productListItems
         });
+      } else {
+        console.warn("❌ Cannot fire purchase event. Cart empty or ADL not ready:", {
+          cartLength: cart?.length,
+          adlExists: !!window.adl,
+          trackPurchaseExists: !!window.adl?.trackPurchase
+        });
+      }
+    }
+
+    // ✅ WAIT FOR ADOBE LAUNCH TO LOAD, THEN FIRE PURCHASE EVENT
+    document.addEventListener('DOMContentLoaded', function () {
+      // Try immediately first
+      if (window.adl && window.adl.trackPurchase) {
+        firePurchaseEvent();
+      } else {
+        // If not ready, wait and retry
+        let attempts = 0;
+        const checkInterval = setInterval(() => {
+          attempts++;
+          console.log(`🔍 Waiting for Adobe Launch (attempt ${attempts})...`);
+
+          if (window.adl && window.adl.trackPurchase) {
+            clearInterval(checkInterval);
+            console.log("✅ Adobe Launch ready! Firing purchase event...");
+            firePurchaseEvent();
+          } else if (attempts > 50) {
+            clearInterval(checkInterval);
+            console.error("❌ Adobe Launch did not load after 5 seconds");
+          }
+        }, 100);
       }
     });
   </script>
-
-  <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js"
-    async></script>
 
   <link rel="stylesheet" href="style.css">
 </head>

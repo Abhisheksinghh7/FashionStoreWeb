@@ -115,6 +115,38 @@ window.adl.trackLinkClick = function(linkName, linkType, linkPosition, linkPageN
 window.adl.trackAddToCart = function(product) {
   const websiteInfo = window.adl.getWebsiteInfo();
   const discountAmount = product.discount ? (product.price * product.discount / 100) : 0;
+  const item = {
+    SKU: product.sku || 'SKU-' + product.id,
+    currencyCode: "INR",
+    discountAmount: discountAmount,
+    discountPercent: product.discount || 0,
+    name: product.name || '',
+    priceTotal: product.price || 0,
+    product: "Default Product",
+    productAddMethod: "cart",
+    productImageUrl: product.img || product.productImageUrl || '',
+    quantity: product.quantity || 1,
+    refundAmount: 0,
+    unitOfMeasureCode: "EA",
+    _id: product._id || 'prod_' + product.id,
+    color: product.color || '',
+    coupon: product.coupon || '',
+    category: product.category || '',
+    size: product.size || '',
+    brand: websiteInfo.brand
+  };
+  
+  // ✅ ADD CUSTOM ATTRIBUTES IN XDM NAMESPACE
+  if (product.productCategory || product.productMaterial || product.productRating !== undefined) {
+    item._digiwebanaoptznapactrsd = {
+      caterpillarsigns: {
+        productCategory: String(product.productCategory || ""),
+        productMaterial: String(product.productMaterial || ""),
+        productRating: Number(product.productRating) || 0
+      }
+    };
+  }
+  
   const eventData = {
     event: "addToCart",
     timestamp: new Date().toISOString(),
@@ -126,26 +158,7 @@ window.adl.trackAddToCart = function(product) {
     },
     xdm: {
       commerce: {
-        productListItems: [{
-          SKU: product.sku || 'SKU-' + product.id,
-          currencyCode: "INR",
-          discountAmount: discountAmount,
-          discountPercent: product.discount || 0,
-          name: product.name || '',
-          priceTotal: product.price || 0,
-          product: "Default Product",
-          productAddMethod: "cart",
-          productImageUrl: product.img || product.productImageUrl || '',
-          quantity: product.quantity || 1,
-          refundAmount: 0,
-          unitOfMeasureCode: "EA",
-          _id: product._id || 'prod_' + product.id,
-          color: product.color || '',
-          coupon: product.coupon || '',
-          category: product.category || '',
-          size: product.size || '',
-          brand: websiteInfo.brand
-        }]
+        productListItems: [item]
       }
     }
   };
@@ -159,6 +172,38 @@ window.adl.trackAddToCart = function(product) {
 window.adl.trackRemoveFromCart = function(product) {
   const websiteInfo = window.adl.getWebsiteInfo();
   const discountAmount = product.discount ? (product.price * product.discount / 100) : 0;
+  const item = {
+    SKU: product.sku || 'SKU-' + product.id,
+    currencyCode: "INR",
+    discountAmount: discountAmount,
+    discountPercent: product.discount || 0,
+    name: product.name || '',
+    priceTotal: product.price || 0,
+    product: "Default Product",
+    productAddMethod: "cart",
+    productImageUrl: product.img || product.productImageUrl || '',
+    quantity: product.quantity || 1,
+    refundAmount: 0,
+    unitOfMeasureCode: "EA",
+    _id: product._id || 'prod_' + product.id,
+    color: product.color || '',
+    coupon: product.coupon || '',
+    category: product.category || '',
+    size: product.size || '',
+    brand: websiteInfo.brand
+  };
+  
+  // ✅ ADD CUSTOM ATTRIBUTES IN XDM NAMESPACE
+  if (product.productCategory || product.productMaterial || product.productRating !== undefined) {
+    item._digiwebanaoptznapactrsd = {
+      caterpillarsigns: {
+        productCategory: String(product.productCategory || ""),
+        productMaterial: String(product.productMaterial || ""),
+        productRating: Number(product.productRating) || 0
+      }
+    };
+  }
+  
   const eventData = {
     event: "removeFromCart",
     timestamp: new Date().toISOString(),
@@ -170,26 +215,7 @@ window.adl.trackRemoveFromCart = function(product) {
     },
     xdm: {
       commerce: {
-        productListItems: [{
-          SKU: product.sku || 'SKU-' + product.id,
-          currencyCode: "INR",
-          discountAmount: discountAmount,
-          discountPercent: product.discount || 0,
-          name: product.name || '',
-          priceTotal: product.price || 0,
-          product: "Default Product",
-          productAddMethod: "cart",
-          productImageUrl: product.img || product.productImageUrl || '',
-          quantity: product.quantity || 1,
-          refundAmount: 0,
-          unitOfMeasureCode: "EA",
-          _id: product._id || 'prod_' + product.id,
-          color: product.color || '',
-          coupon: product.coupon || '',
-          category: product.category || '',
-          size: product.size || '',
-          brand: websiteInfo.brand
-        }]
+        productListItems: [item]
       }
     }
   };
@@ -220,12 +246,14 @@ window.adl.trackShoppingCartView = function(cart, pageName) {
             priceTotal: Math.round(complete.price * complete.qty),
             quantity: Math.round(complete.qty)
           };
-          // Only add _caterpillarsigns if values exist
+          // ✅ ADD CUSTOM ATTRIBUTES IN XDM NAMESPACE
           if (complete.productCategory || complete.productMaterial || complete.productRating) {
-            item._caterpillarsigns = {
-              productCategory: complete.productCategory,
-              productMaterial: complete.productMaterial,
-              productRating: Math.round(complete.productRating)
+            item._digiwebanaoptznapactrsd = {
+              caterpillarsigns: {
+                productCategory: String(complete.productCategory || ""),
+                productMaterial: String(complete.productMaterial || ""),
+                productRating: Number(complete.productRating) || 0
+              }
             };
           }
           return item;
@@ -283,12 +311,14 @@ window.adl.trackCheckout = function(cart) {
             priceTotal: Math.round(complete.price * complete.qty),
             quantity: Math.round(complete.qty)
           };
-          // Only add _caterpillarsigns if values exist
+          // ✅ ADD CUSTOM ATTRIBUTES IN XDM NAMESPACE
           if (complete.productCategory || complete.productMaterial || complete.productRating) {
-            item._caterpillarsigns = {
-              productCategory: complete.productCategory,
-              productMaterial: complete.productMaterial,
-              productRating: Math.round(complete.productRating)
+            item._digiwebanaoptznapactrsd = {
+              caterpillarsigns: {
+                productCategory: String(complete.productCategory || ""),
+                productMaterial: String(complete.productMaterial || ""),
+                productRating: Number(complete.productRating) || 0
+              }
             };
           }
           return item;
@@ -318,7 +348,7 @@ window.adl.trackPurchase = function(order) {
       commerce: {
         orderID: order.orderID || "",
         revenue: order.totalValue || 0,
-        productListItems: (order.products || order || []).map(p => {
+        productListItems: (order.productListItems || order.products || order || []).map(p => {
           const complete = window.adl.getCompleteProductData(p);
           const item = {
             SKU: complete.sku,
@@ -326,12 +356,14 @@ window.adl.trackPurchase = function(order) {
             priceTotal: Math.round(complete.price * complete.qty),
             quantity: Math.round(complete.qty)
           };
-          // Only add _caterpillarsigns if values exist
+          // ✅ ADD CUSTOM ATTRIBUTES IN XDM NAMESPACE
           if (complete.productCategory || complete.productMaterial || complete.productRating) {
-            item._caterpillarsigns = {
-              productCategory: complete.productCategory,
-              productMaterial: complete.productMaterial,
-              productRating: Math.round(complete.productRating)
+            item._digiwebanaoptznapactrsd = {
+              caterpillarsigns: {
+                productCategory: String(complete.productCategory || ""),
+                productMaterial: String(complete.productMaterial || ""),
+                productRating: Number(complete.productRating) || 0
+              }
             };
           }
           return item;

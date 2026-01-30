@@ -35,14 +35,42 @@
     // ✅ CHECKOUT VIEW EVENT (scCheckout) - Push once on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', function () {
       const cart = JSON.parse(localStorage.getItem("cart")) || [];
-      if (cart.length > 0 && window.adl && window.adl.trackCheckout) {
-        const checkoutData = {
-          totalQuantity: cart.reduce((sum, item) => sum + item.qty, 0),
-          totalValue: cart.reduce((sum, item) => sum + item.price * item.qty, 0),
-          products: cart
-        };
+      if (cart.length > 0 && window.adl) {
+        // Build productListItems array
+        const productListItems = cart.map(item => {
+          const complete = window.adl.getCompleteProductData(item);
+          const itemObj = {
+            SKU: complete.sku,
+            name: complete.name,
+            priceTotal: Math.round(complete.price * complete.qty),
+            quantity: Math.round(complete.qty)
+          };
+          // Only add _caterpillarsigns if it has values
+          if (complete.productCategory || complete.productMaterial || complete.productRating) {
+            itemObj._caterpillarsigns = {
+              productCategory: complete.productCategory,
+              productMaterial: complete.productMaterial,
+              productRating: Math.round(complete.productRating)
+            };
+          }
+          return itemObj;
+        });
 
-        window.adl.trackCheckout(checkoutData);
+        // Push event directly to adobeDataLayer
+        window.adobeDataLayer = window.adobeDataLayer || [];
+        window.adobeDataLayer.push({
+          event: "scCheckout",
+          timestamp: new Date().toISOString(),
+          xdm: {
+            eventType: "commerce.checkouts",
+            commerce: {
+              checkouts: {
+                value: 1
+              },
+              productListItems: productListItems
+            }
+          }
+        });
       }
     });
   </script>

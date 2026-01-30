@@ -33,51 +33,39 @@
     });
 
     // ✅ CHECKOUT VIEW EVENT (scCheckout) - Push once on DOMContentLoaded
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
       const cart = JSON.parse(localStorage.getItem("cart")) || [];
-      if (cart.length > 0 && window.adl) {
-        // Build productListItems array
-        const productListItems = cart.map(item => {
-          const complete = window.adl.getCompleteProductData(item);
-          const itemObj = {
-            SKU: complete.sku,
-            name: complete.name,
-            priceTotal: Math.round(complete.price * complete.qty),
-            quantity: Math.round(complete.qty)
+      if (cart.length > 0 && window.adl && window.adl.trackCheckout) {
+        let total = 0;
+        const products = cart.map(item => {
+          total += item.price * item.qty;
+          return {
+            sku: 'SKU-' + item.id,
+            productID: item.id,
+            productName: item.name,
+            brand: 'Fashion Store',
+            category: '',
+            price: item.price,
+            color: item.color || '',
+            size: '',
+            quantity: item.qty,
+            currencyCode: "INR"
           };
-          // Only add _caterpillarsigns if it has values
-          if (complete.productCategory || complete.productMaterial || complete.productRating) {
-            itemObj._caterpillarsigns = {
-              productCategory: complete.productCategory,
-              productMaterial: complete.productMaterial,
-              productRating: Math.round(complete.productRating)
-            };
-          }
-          return itemObj;
         });
-
-        // Push event directly to adobeDataLayer
-        window.adobeDataLayer = window.adobeDataLayer || [];
-        window.adobeDataLayer.push({
-          event: "scCheckout",
-          timestamp: new Date().toISOString(),
-          xdm: {
-            eventType: "commerce.checkouts",
-            commerce: {
-              checkouts: {
-                value: 1
-              },
-              productListItems: productListItems
-            }
-          }
-        });
+        
+        const checkoutData = {
+          totalQuantity: cart.reduce((sum, item) => sum + item.qty, 0),
+          totalValue: total,
+          products: products
+        };
+        
+        window.adl.trackCheckout(checkoutData);
       }
     });
   </script>
 
   <!-- Adobe Launch -->
-  <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js"
-    async></script>
+ <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js" async></script>
 
   <link rel="stylesheet" href="style.css">
 
@@ -113,95 +101,58 @@
 
 <body>
 
-  <header>
-    <h2>Checkout</h2>
-    <div class="mini-cart" onclick="goToCart()">🛒 <span id="miniCartCount">0</span></div>
-  </header>
+<header>
+  <h2>Checkout</h2>
+  <div class="mini-cart" onclick="goToCart()">🛒 <span id="miniCartCount">0</span></div>
+</header>
 
-  <div class="container">
-    <h3 id="checkoutTotal"></h3>
+<div class="container">
+  <h3 id="checkoutTotal"></h3>
 
-    <div class="customer-info">
-      <input type="text" id="custName" placeholder="Full Name">
-      <input type="text" id="custPhone" placeholder="Mobile Number">
-      <input type="email" id="custEmail" placeholder="Email Address">
-    </div>
-
-    <div class="payment-methods">
-      <label class="payment-card">
-        <input type="radio" name="payment" value="PhonePe">
-        <img src="PhonePeSVG.wine.svg">
-      </label>
-
-      <label class="payment-card">
-        <input type="radio" name="payment" value="GPay">
-        <img src="GooglepaySVG.wine.svg">
-      </label>
-
-      <label class="payment-card">
-        <input type="radio" name="payment" value="Paytm">
-        <img src="PaytmSVG.wine.svg">
-      </label>
-    </div>
-
-    <div class="checkout-actions">
-      <button id="placeOrderBtn">Place Order</button>
-      <button type="button" id="cancelOrderBtn">Cancel Order</button>
-    </div>
-
-    <div class="modal" id="modal">
-      <div class="modal-content">
-        <h3 id="mTitle"></h3>
-        <p id="mText"></p>
-        <button id="okBtn">OK</button>
-      </div>
-    </div>
+  <div class="customer-info">
+    <input type="text" id="custName" placeholder="Full Name">
+    <input type="text" id="custPhone" placeholder="Mobile Number">
+    <input type="email" id="custEmail" placeholder="Email Address">
   </div>
 
-  <script src="app.js"></script>
-  <script src="cancel-order.js"></script>
-  <script src="adl-utils.js"></script>
-  <script src="adl-events.js"></script>
-  <script src="adl-auto-track.js"></script>
+  <div class="payment-methods">
+    <label class="payment-card">
+      <input type="radio" name="payment" value="PhonePe">
+      <img src="PhonePeSVG.wine.svg">
+    </label>
 
-  <script>
-    // Console logging only - for verification
-    document.addEventListener('DOMContentLoaded', function () {
-      setTimeout(function () {
-        const cart = getCart();
-        if (cart.length > 0) {
-          const productCatalog = {
-            1: { productCategory: "fashion", productMaterial: "cotton", productRating: 4.5 },
-            2: { productCategory: "fashion", productMaterial: "denim", productRating: 4.3 },
-            3: { productCategory: "fashion", productMaterial: "polyester", productRating: 4.7 },
-            4: { productCategory: "footwear", productMaterial: "leather", productRating: 4.4 },
-            5: { productCategory: "fashion", productMaterial: "cotton", productRating: 4.2 },
-            6: { productCategory: "electronics", productMaterial: "plastic", productRating: 4.8 },
-            7: { productCategory: "electronics", productMaterial: "plastic", productRating: 4.6 },
-            8: { productCategory: "electronics", productMaterial: "metal", productRating: 4.5 }
-          };
-          const logData = cart.map(item => {
-            const caterpillar = productCatalog[item.id] || { productCategory: '', productMaterial: '', productRating: 0 };
-            return {
-              SKU: item.sku || 'SKU-' + item.id,
-              name: item.name,
-              priceTotal: item.price * item.qty,
-              quantity: item.qty,
-              _caterpillarsigns: {
-                productCategory: caterpillar.productCategory,
-                productMaterial: caterpillar.productMaterial,
-                productRating: caterpillar.productRating
-              }
-            };
-          });
-          console.log("📦 Product List Items (Checkout Page):", logData);
-          console.table(logData);
-        }
-      }, 500);
-    });
-  </script>
+    <label class="payment-card">
+      <input type="radio" name="payment" value="GPay">
+      <img src="GooglepaySVG.wine.svg">
+    </label>
 
-  <script>
+    <label class="payment-card">
+      <input type="radio" name="payment" value="Paytm">
+      <img src="PaytmSVG.wine.svg">
+    </label>
+  </div>
+
+  <div class="checkout-actions">
+    <button id="placeOrderBtn">Place Order</button>
+    <button type="button" id="cancelOrderBtn">Cancel Order</button>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h3 id="mTitle"></h3>
+      <p id="mText"></p>
+      <button id="okBtn">OK</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script src="cancel-order.js"></script>
+<script src="adl-utils.js"></script>
+<script src="adl-events.js"></script>
+<script src="adl-auto-track.js"></script>
+
+<script>
     const cart = getCart();
 
     document.getElementById("checkoutTotal").textContent =
@@ -209,5 +160,4 @@
   </script>
 
 </body>
-
 </html>

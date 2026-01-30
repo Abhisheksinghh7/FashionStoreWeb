@@ -38,79 +38,89 @@
   </script>
 
   <!-- Adobe Launch -->
-  <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js"
-    async></script>
+  <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js" async></script>
 
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <header>
-    <h2>Processing Payment</h2>
-  </header>
+<header>
+  <h2>Processing Payment</h2>
+</header>
 
-  <div class="container" style="text-align:center">
-    <h3>Order ID: <strong id="orderId"></strong></h3>
-    <div class="loader"></div>
-    <p>Please wait while payment is processed...</p>
-  </div>
+<div class="container" style="text-align:center">
+  <h3>Order ID: <strong id="orderId"></strong></h3>
+  <div class="loader"></div>
+  <p>Please wait while payment is processed...</p>
+</div>
 
-  <script src="adl-utils.js"></script>
-  <script src="adl-events.js"></script>
-  <script src="adl-auto-track.js"></script>
+<script src="adl-utils.js"></script>
+<script src="adl-events.js"></script>
+<script src="adl-auto-track.js"></script>
 
-  <script>
-    document.getElementById("orderId").textContent = orderId;
+<script>
+  document.getElementById("orderId").textContent = orderId;
 
-    const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
+  const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
 
-    // ✅ PAYMENT SUCCESS VIEW EVENT - Comprehensive productListItems
-    setTimeout(() => {
-      window.adobeDataLayer.push({
-        event: "paymentSuccessView",
-        xdm: {
-          commerce: {
-            productListItems: cart.map((item, index) => {
-              const catalogProduct = window.adl?.productCatalog?.[item.id] || {};
-              const name = item.name || catalogProduct.name || '';
-              const productRating = catalogProduct.productRating || 0;
-              const productCategory = catalogProduct.productCategory || '';
-              const productMaterial = catalogProduct.productMaterial || '';
-              return {
-                SKU: item.sku || 'SKU-' + item.id,
-                name: name,
-                priceTotal: Math.round((item.price || 0) * (item.qty || 1)),
-                quantity: Math.round(item.qty || 1),
-                _caterpillarsigns: {
-                  productCategory: productCategory,
-                  productMaterial: productMaterial,
-                  productRating: Math.round(productRating)
-                }
-              };
-            })
+  // ✅ PAYMENT SUCCESS VIEW EVENT - Comprehensive productListItems
+  setTimeout(() => {
+    window.adobeDataLayer.push({
+      event: "paymentSuccessView",
+      xdm: {
+        commerce: {
+          productListItems: cart.map((item, index) => {
+            const catalogProduct = window.adl?.productCatalog?.[item.id] || {};
+            const name = item.name || catalogProduct.name || '';
+            const img = item.img || catalogProduct.img || '';
+            const discount = item.discount !== undefined ? item.discount : (catalogProduct.discount || 0);
+            const coupon = item.coupon || catalogProduct.coupon || '';
+            const category = item.category || catalogProduct.category || '';
+            const color = item.color || catalogProduct.color || '';
+            const discountAmount = discount ? (item.price * discount / 100) : 0;
+            return {
+              SKU: item.sku || 'SKU-' + item.id,
+              currencyCode: "INR",
+              discountAmount: discountAmount,
+              discountPercent: discount,
+              name: name,
+              priceTotal: (item.price || 0) * (item.qty || 1),
+              product: "Default Product",
+              productAddMethod: "cart",
+              productImageUrl: img,
+              quantity: item.qty || 1,
+              refundAmount: 0,
+              unitOfMeasureCode: "EA",
+              _id: item._id || 'prod_' + item.id,
+              color: color,
+              coupon: coupon,
+              category: category,
+              size: item.size || '',
+              brand: "Fashion Store"
+            };
+          })
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+
+    window.adobeDataLayer.push({
+      event: "paymentSuccess",
+      xdm: {
+        commerce: {
+          order: {
+            orderID: orderId,
+            paymentMethod: localStorage.getItem("checkoutPaymentMethod") || ""
           }
-        },
-        timestamp: new Date().toISOString()
-      });
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
 
-      window.adobeDataLayer.push({
-        event: "paymentSuccess",
-        xdm: {
-          commerce: {
-            order: {
-              orderID: orderId,
-              paymentMethod: localStorage.getItem("checkoutPaymentMethod") || ""
-            }
-          }
-        },
-        timestamp: new Date().toISOString()
-      });
-
-      location.href = "thankyou.html";
-    }, 3000);
-  </script>
+    location.href = "thankyou.html";
+  }, 3000);
+</script>
 
 </body>
-
 </html>

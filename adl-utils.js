@@ -334,6 +334,12 @@ window.adl.trackCheckout = function(cart) {
 // =============================
 window.adl.trackPurchase = function(order) {
   const websiteInfo = window.adl.getWebsiteInfo();
+  
+  console.log("🛍️ trackPurchase called with order:", JSON.stringify(order, null, 2));
+  
+  // ✅ Pass productListItems directly if they already have the correct structure
+  const items = order.productListItems || [];
+  
   const eventData = {
     event: "scPurchase",
     timestamp: new Date().toISOString(),
@@ -346,31 +352,16 @@ window.adl.trackPurchase = function(order) {
     },
     xdm: {
       commerce: {
-        orderID: order.orderID || "",
-        revenue: order.totalValue || 0,
-        productListItems: (order.productListItems || order.products || order || []).map(p => {
-          const complete = window.adl.getCompleteProductData(p);
-          const item = {
-            SKU: complete.sku,
-            name: complete.name,
-            priceTotal: Math.round(complete.price * complete.qty),
-            quantity: Math.round(complete.qty)
-          };
-          // ✅ ADD CUSTOM ATTRIBUTES IN XDM NAMESPACE
-          if (complete.productCategory || complete.productMaterial || complete.productRating) {
-            item._digiwebanaoptznapactrsd = {
-              caterpillarsigns: {
-                productCategory: String(complete.productCategory || ""),
-                productMaterial: String(complete.productMaterial || ""),
-                productRating: Number(complete.productRating) || 0
-              }
-            };
-          }
-          return item;
-        })
+        order: {
+          purchaseID: order.orderID || "",
+          currencyCode: "INR"
+        },
+        productListItems: items
       }
     }
   };
+  
+  console.log("📤 Pushing purchase event:", JSON.stringify(eventData, null, 2));
   adl.push(eventData);
 };
 

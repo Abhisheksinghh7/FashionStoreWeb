@@ -1,13 +1,13 @@
 // ===== PRODUCT CATALOG WITH EXTENDED DETAILS =====
 const productCatalog = {
-  1: { id: 1, name: "T-Shirt", price: 799, discount: 10, coupon: "TSHIRT10", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800", color: "Red", category: "Apparel", productCategory: "fashion", productMaterial: "cotton", productRating: 4.5 },
-  2: { id: 2, name: "Jeans", price: 1999, discount: 5, coupon: "JEANS5", img: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", color: "Blue", category: "Apparel", productCategory: "fashion", productMaterial: "denim", productRating: 4.3 },
-  3: { id: 3, name: "Jacket", price: 3499, discount: 15, coupon: "JACKET15", img: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", color: "Black", category: "Apparel", productCategory: "fashion", productMaterial: "polyester", productRating: 4.7 },
-  4: { id: 4, name: "Shoes", price: 2499, discount: 20, coupon: "SHOES20", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800", color: "White", category: "Footwear", productCategory: "footwear", productMaterial: "leather", productRating: 4.4 },
-  5: { id: 5, name: "Shirt", price: 1499, discount: 0, coupon: "", img: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=800", color: "Grey", category: "Apparel", productCategory: "fashion", productMaterial: "cotton", productRating: 4.2 },
-  6: { id: 6, name: "Camera", price: 45999, discount: 5, coupon: "CAMERA5", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=800", color: "Black", category: "Electronics", productCategory: "electronics", productMaterial: "plastic", productRating: 4.8 },
-  7: { id: 7, name: "Headphone", price: 2999, discount: 10, coupon: "HEAD10", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800", color: "Blue", category: "Electronics", productCategory: "electronics", productMaterial: "plastic", productRating: 4.6 },
-  8: { id: 8, name: "Smartwatch", price: 9999, discount: 0, coupon: "", img: "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=800", color: "Black", category: "Electronics", productCategory: "electronics", productMaterial: "metal", productRating: 4.5 }
+  1: { id: 1, name: "T-Shirt", price: 799, discount: 10, coupon: "TSHIRT10", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800", color: "Red", category: "Apparel", productCategory: "fashion", productMaterial: "cotton", productRating: 5 },
+  2: { id: 2, name: "Jeans", price: 1999, discount: 5, coupon: "JEANS5", img: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800", color: "Blue", category: "Apparel", productCategory: "fashion", productMaterial: "denim", productRating: 4 },
+  3: { id: 3, name: "Jacket", price: 3499, discount: 15, coupon: "JACKET15", img: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800", color: "Black", category: "Apparel", productCategory: "fashion", productMaterial: "polyester", productRating: 5 },
+  4: { id: 4, name: "Shoes", price: 2499, discount: 20, coupon: "SHOES20", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800", color: "White", category: "Footwear", productCategory: "footwear", productMaterial: "leather", productRating: 4 },
+  5: { id: 5, name: "Shirt", price: 1499, discount: 0, coupon: "", img: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=800", color: "Grey", category: "Apparel", productCategory: "fashion", productMaterial: "cotton", productRating: 4 },
+  6: { id: 6, name: "Camera", price: 45999, discount: 5, coupon: "CAMERA5", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=800", color: "Black", category: "Electronics", productCategory: "electronics", productMaterial: "plastic", productRating: 5 },
+  7: { id: 7, name: "Headphone", price: 2999, discount: 10, coupon: "HEAD10", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800", color: "Blue", category: "Electronics", productCategory: "electronics", productMaterial: "plastic", productRating: 5 },
+  8: { id: 8, name: "Smartwatch", price: 9999, discount: 0, coupon: "", img: "https://images.unsplash.com/photo-1544117519-31a4b719223d?w=800", color: "Black", category: "Electronics", productCategory: "electronics", productMaterial: "metal", productRating: 5 }
 };
 
 // ===== PRODUCT LIST ITEMS CONSOLE LOGGING =====

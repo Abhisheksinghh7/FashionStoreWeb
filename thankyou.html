@@ -48,45 +48,51 @@
       const orderEmail = localStorage.getItem("checkoutCustomerEmail") || "";
       const customerName = localStorage.getItem("checkoutCustomerName") || "";
 
+      console.log("📦 Raw cart from localStorage:", JSON.stringify(cart, null, 2));
+
       if (cart.length > 0 && window.adl && window.adl.trackPurchase) {
 
-        // 🔧 FIXED productListItems structure
+        // ✅ Build productListItems with ALL correct data
         const productListItems = cart.map(item => {
-          const catalog = {
-            1: { productCategory: "fashion", productMaterial: "cotton", productRating: 5 },
-            2: { productCategory: "fashion", productMaterial: "denim", productRating: 4 },
-            3: { productCategory: "fashion", productMaterial: "polyester", productRating: 4 },
-            4: { productCategory: "footwear", productMaterial: "leather", productRating: 4 },
-            5: { productCategory: "fashion", productMaterial: "cotton", productRating: 4 },
-            6: { productCategory: "electronics", productMaterial: "plastic", productRating: 5 },
-            7: { productCategory: "electronics", productMaterial: "plastic", productRating: 4 },
-            8: { productCategory: "electronics", productMaterial: "metal", productRating: 5 }
-          };
+          console.log("🔍 Processing item:", item);
 
-          const meta = catalog[item.id] || {};
+          // Get proper values from cart item
+          const sku = String(item.id); // Use ID as SKU (e.g., "1" for T-Shirt)
+          const price = Number(item.price) || 0;
+          const qty = Number(item.qty) || 1;
+          const totalPrice = price * qty;
 
           const listItem = {
-            SKU: item.sku || "SKU-" + item.id,
-            name: item.name,
-            quantity: item.qty,
-            priceTotal: item.price * item.qty
+            SKU: sku,
+            name: item.name || "",
+            quantity: qty,
+            priceTotal: totalPrice
           };
 
+          console.log("✅ Base item:", listItem);
+
           // ✅ ADD CUSTOM ATTRIBUTES IN XDM NAMESPACE
-          if (meta.productCategory || meta.productMaterial || meta.productRating) {
+          const productCategory = item.productCategory || "";
+          const productMaterial = item.productMaterial || "";
+          const productRating = Math.round(Number(item.productRating)) || 0;
+
+          console.log("🎯 Custom attributes from cart:", { productCategory, productMaterial, productRating });
+
+          if (productCategory || productMaterial || productRating) {
             listItem._digiwebanaoptznapactrsd = {
               caterpillarsigns: {
-                productCategory: String(meta.productCategory || ""),
-                productMaterial: String(meta.productMaterial || ""),
-                productRating: Number(meta.productRating) || 0
+                productCategory: String(productCategory),
+                productMaterial: String(productMaterial),
+                productRating: Number(productRating)
               }
             };
+            console.log("✅ With caterpillarsigns:", listItem);
           }
 
           return listItem;
         });
 
-        console.log("📦 Firing purchase event with productListItems:", productListItems);
+        console.log("📦 FINAL productListItems to send:", JSON.stringify(productListItems, null, 2));
 
         window.adl.trackPurchase({
           orderID: orderId,

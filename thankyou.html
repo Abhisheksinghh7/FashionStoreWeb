@@ -9,7 +9,7 @@
     window.adobeDataLayer = window.adobeDataLayer || [];
   </script>
 
-  <!-- ✅ XDM PAGE LOAD (Page-level only, NO product details) -->
+  <!-- ✅ XDM PAGE LOAD -->
   <script>
     window.adobeDataLayer.push({
       event: "pageLoaded",
@@ -31,125 +31,122 @@
         }
       }
     });
+  </script>
 
-    // ✅ PURCHASE EVENT (scPurchase) - Complete order details with all product/revenue info
-    document.addEventListener('DOMContentLoaded', function() {
+  <!-- ✅ PURCHASE EVENT -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
       const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
       const orderId = localStorage.getItem("checkoutTransactionId") || "ORD-" + Date.now();
-      
-      // Get email from checkout form (stored in localStorage)
-      let orderEmail = localStorage.getItem("checkoutCustomerEmail") || "";
-      let customerName = localStorage.getItem("checkoutCustomerName") || "";
-      
+
+      const orderEmail = localStorage.getItem("checkoutCustomerEmail") || "";
+      const customerName = localStorage.getItem("checkoutCustomerName") || "";
+
       if (cart.length > 0 && window.adl && window.adl.trackPurchase) {
-        let total = 0;
-        const products = cart.map(item => {
-          total += item.price * item.qty;
+
+        // 🔧 FIXED productListItems structure
+        const productListItems = cart.map(item => {
+          const catalog = {
+            1: { category: "fashion", material: "cotton", rating: 5 },
+            2: { category: "fashion", material: "denim", rating: 4 },
+            3: { category: "fashion", material: "polyester", rating: 4 },
+            4: { category: "footwear", material: "leather", rating: 4 },
+            5: { category: "fashion", material: "cotton", rating: 4 },
+            6: { category: "electronics", material: "plastic", rating: 5 },
+            7: { category: "electronics", material: "plastic", rating: 4 },
+            8: { category: "electronics", material: "metal", rating: 5 }
+          };
+
+          const meta = catalog[item.id] || {};
+
           return {
-            id: item.id,
-            sku: item.sku || 'SKU-' + item.id,
+            SKU: item.sku || "SKU-" + item.id,
             name: item.name,
-            price: item.price,
-            img: item.img,
-            qty: item.qty,
-            color: item.color || '',
-            coupon: item.coupon || '',
-            discount: item.discount || 0,
-            category: item.category || ''
+            quantity: item.qty,
+            priceTotal: item.price * item.qty,
+
+            // ✅ EXACT schema namespace
+            _digiwebanaoptznapactrsd: {
+              caterpillarsigns: {
+                productCategory: meta.category || "",
+                productMaterial: meta.material || "",
+                productRating: Number(meta.rating) || 0
+              }
+            }
           };
         });
-        
-        const orderData = {
+
+        window.adl.trackPurchase({
           orderID: orderId,
-          totalQuantity: cart.reduce((sum, item) => sum + item.qty, 0),
-          subtotal: total,
-          shipping: 0,
-          tax: 0,
-          totalValue: total,
-          paymentMethod: 'credit_card',
+          totalQuantity: cart.reduce((s, i) => s + i.qty, 0),
+          totalValue: cart.reduce((s, i) => s + i.price * i.qty, 0),
           customerEmail: orderEmail,
           firstName: customerName,
-          lastName: '',
-          address: '',
-          city: '',
-          state: '',
-          zipCode: '',
-          products: products
-        };
-        
-        window.adl.trackPurchase(orderData);
+          productListItems: productListItems
+        });
       }
     });
   </script>
 
- <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js" async></script>
+  <script src="https://assets.adobedtm.com/21b53c73144b/5951ce710caa/launch-c3f0f6fab34e-development.min.js" async></script>
 
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header>
-  <h2>Order Confirmed</h2>
-</header>
+  <header>
+    <h2>Order Confirmed</h2>
+  </header>
 
-<div class="container thankyou-container">
-  <h2>🎉 Thank You for Your Order</h2>
-  <p>Order ID: <strong id="orderId"></strong></p>
+  <div class="container thankyou-container">
+    <h2>🎉 Thank You for Your Order</h2>
+    <p>Order ID: <strong id="orderId"></strong></p>
 
-  <table width="100%" border="1" cellspacing="0" cellpadding="8">
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>ID</th>
-        <th>Qty</th>
-        <th>Amount</th>
-        <th>Color</th>
-        <th>Coupon</th>
-      </tr>
-    </thead>
-    <tbody id="orderRows"></tbody>
-  </table>
+    <table width="100%" border="1">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>ID</th>
+          <th>Qty</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody id="orderRows"></tbody>
+    </table>
 
-  <h3 id="grandTotal"></h3>
-  <button onclick="finishOrder()">Go to Home</button>
-</div>
+    <h3 id="grandTotal"></h3>
+    <button onclick="finishOrder()">Go to Home</button>
+  </div>
 
-<script src="app.js"></script>
-<script src="adl-utils.js"></script>
-<script src="adl-events.js"></script>
-<script src="adl-auto-track.js"></script>
+  <script>
+    const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
+    const orderId = localStorage.getItem("checkoutTransactionId");
+    let total = 0;
 
-<script>
-  // Generate random unique email
-  const cart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
-  const orderId = localStorage.getItem("checkoutTransactionId");
-  let total = 0;
+    document.getElementById("orderId").textContent = orderId || "N/A";
 
-  document.getElementById("orderId").textContent = orderId || "N/A"
-  cart.forEach(p => {
-    const amt = p.price * p.qty;
-    total += amt;
+    cart.forEach(p => {
+      const amt = p.price * p.qty;
+      total += amt;
 
-    orderRows.innerHTML += `
-      <tr>
-        <td>${p.name}</td>
-        <td>${p.id}</td>
-        <td>${p.qty}</td>
-        <td>₹${amt}</td>
-        <td>${p.color || ''}</td>
-        <td>${p.coupon || ''}</td>
-      </tr>
-    `;
-  });
+      orderRows.innerHTML += `
+        <tr>
+          <td>${p.name}</td>
+          <td>${p.id}</td>
+          <td>${p.qty}</td>
+          <td>₹${amt}</td>
+        </tr>
+      `;
+    });
 
-  grandTotal.textContent = "Total Paid: ₹" + total;
+    grandTotal.textContent = "Total Paid: ₹" + total;
 
-  function finishOrder() {
-    localStorage.clear();
-    location.href = "index.html";
-  }
-</script>
+    function finishOrder() {
+      localStorage.clear();
+      location.href = "index.html";
+    }
+  </script>
 
 </body>
 </html>

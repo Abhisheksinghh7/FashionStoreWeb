@@ -309,3 +309,60 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
+
+
+
+/**
+ * ADOBE LAUNCH DATA ELEMENT CODE
+ * Purpose: Extract productListItems with custom namespace from data layer
+ * and map to Adobe XDM schema
+ * 
+ * This data element extracts all standard and custom product attributes
+ * and maps them to the correct XDM namespace structure
+ */
+/*
+var products = _satellite.getVar("productListItems");
+var items = [];
+
+if (!Array.isArray(products)) {
+  console.warn("⚠️ productListItems is not an array:", products);
+  return items;
+}
+
+products.forEach(function (item, index) {
+  
+  // ✅ EXTRACT CUSTOM ATTRIBUTES FROM XDM NAMESPACE
+  var customData = 
+    (item._digiwebanaoptznapactrsd && item._digiwebanaoptznapactrsd.caterpillarsigns) || {};
+
+  // ✅ CREATE BASE PRODUCT LIST ITEM WITH STANDARD FIELDS
+  var itemObj = {
+    SKU: String(item.SKU || "").trim(),
+    name: String(item.name || "").trim(),
+    quantity: Number(item.quantity) || 1,
+    priceTotal: Number(item.priceTotal) || 0
+  };
+
+  // ✅ MAP CUSTOM PRODUCT ATTRIBUTES TO XDM NAMESPACE
+  // Always include custom namespace if any custom data exists
+  if (
+    customData.productCategory ||
+    customData.productMaterial ||
+    customData.productRating !== undefined
+  ) {
+    itemObj._digiwebanaoptznapactrsd = {
+      caterpillarsigns: {
+        productCategory: String(customData.productCategory || "").trim(),
+        productMaterial: String(customData.productMaterial || "").trim(),
+        productRating: Number(customData.productRating) || 0
+      }
+    };
+  }
+
+  console.log("✅ Item " + index + " processed:", itemObj);
+  items.push(itemObj);
+});
+
+console.log("✅ Final productListItems for schema:", items);
+return items;
+*/
